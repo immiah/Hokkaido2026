@@ -1,0 +1,1365 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>自由的感覺 - 北海道冒險指南 (Minecraft Dungeons Edition)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        mcDark: '#0d1117',
+                        mcDarker: '#07090d',
+                        mcPanel: '#161d26',
+                        mcPanelBorder: '#2f3e52',
+                        mcGold: '#f5c451',
+                        mcGoldHover: '#d9a936',
+                        mcRed: '#b8383e',
+                        mcGreen: '#3e8c58',
+                        mcBlue: '#2e7fa6',
+                        mcPurple: '#714594',
+                        mcEmber: '#ff7722',
+                        mcText: '#e2e6ef',
+                        mcMuted: '#8b9bb4'
+                    },
+                    fontFamily: {
+                        pixel: ['"Press Start 2P"', '"VT323"', 'monospace', 'sans-serif'],
+                        sans: ['"Inter"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts for Pixel Style -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Minecraft Dungeons Dark Forest & Fiery Ember Custom Styling */
+        body {
+            background-color: #07090d;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(46, 127, 166, 0.12) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 119, 34, 0.08) 0%, transparent 40%),
+                linear-gradient(to bottom, #07090d, #0d1117);
+            color: #e2e6ef;
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation;
+        }
+
+        .pixel-font {
+            font-family: 'Press Start 2P', monospace;
+        }
+
+        .vt-font {
+            font-family: 'VT323', monospace;
+        }
+
+        /* Chunky Pixelated borders & boxes inspired by MC Dungeons UI */
+        .pixel-box {
+            background-color: #161d26;
+            border: 3px solid #2f3e52;
+            box-shadow: inset -3px -3px 0px rgba(0,0,0,0.7), inset 3px 3px 0px rgba(255,255,255,0.06), 0 6px 12px rgba(0,0,0,0.6);
+        }
+
+        .pixel-box-sm {
+            background-color: #161d26;
+            border: 2px solid #2f3e52;
+            box-shadow: inset -2px -2px 0px rgba(0,0,0,0.7), inset 2px 2px 0px rgba(255,255,255,0.06);
+        }
+
+        .pixel-btn {
+            background-color: #2e7fa6;
+            border: 3px solid #174259;
+            box-shadow: inset -2px -2px 0px #0f2b3a, inset 2px 2px 0px #4ba6d4;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 0.65rem;
+            color: #ffffff;
+            transition: all 0.1s ease;
+        }
+        .pixel-btn:hover {
+            background-color: #3895c2;
+        }
+        .pixel-btn:active {
+            box-shadow: inset 2px 2px 0px #0f2b3a;
+            transform: translateY(1px);
+        }
+
+        .pixel-btn-gold {
+            background-color: #d9a936;
+            border: 3px solid #6b5012;
+            box-shadow: inset -2px -2px 0px #4d370c, inset 2px 2px 0px #f7d774;
+            color: #07090d;
+        }
+        .pixel-btn-gold:hover {
+            background-color: #f5c451;
+        }
+
+        .pixel-btn-red {
+            background-color: #b8383e;
+            border: 3px solid #571619;
+            box-shadow: inset -2px -2px 0px #380d0f, inset 2px 2px 0px #d9575d;
+            color: #ffffff;
+        }
+        .pixel-btn-red:hover {
+            background-color: #cf474e;
+        }
+
+        .pixel-tab {
+            background-color: #0d1117;
+            border: 2px solid #233042;
+        }
+        .pixel-tab.active {
+            background-color: #161d26;
+            border-color: #f5c451;
+            border-bottom: 2px solid #161d26;
+        }
+
+        /* Glowing ember effects */
+        .ember-glow {
+            box-shadow: 0 0 15px rgba(255, 119, 34, 0.35);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #07090d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2f3e52;
+            border-radius: 2px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #415773;
+        }
+
+        /* Dungeons scanlines overlay */
+        .scanlines {
+            background: linear-gradient(rgba(7, 9, 13, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 119, 34, 0.008), rgba(46, 127, 166, 0.008));
+            background-size: 100% 4px, 4px 100%;
+            pointer-events: none;
+        }
+
+        .modal-backdrop {
+            background-color: rgba(7, 9, 13, 0.88);
+            backdrop-filter: blur(6px);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col pb-24 select-none">
+
+    <!-- Top Header Bar -->
+    <header class="sticky top-0 z-40 bg-mcDarker border-b-4 border-mcPanelBorder px-4 py-3 shadow-2xl">
+        <div class="max-w-md mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 pixel-box flex items-center justify-center bg-mcEmber text-white font-bold text-lg shadow-lg ember-glow">
+                    <i class="fa-solid fa-fire-flame-curved text-white animate-pulse"></i>
+                </div>
+                <div>
+                    <h1 class="pixel-font text-[10px] text-mcGold tracking-wider">自由的感覺</h1>
+                    <p class="vt-font text-mcMuted text-lg tracking-wide">HOKKAIDO DUNGEONS '26</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <label class="pixel-btn px-2 py-1 text-[9px] bg-mcEmber border-orange-900 cursor-pointer flex items-center">
+                    <i class="fa-solid fa-image mr-1"></i>背景
+                    <input type="file" id="bg-upload-input" accept="image/*" class="hidden" onchange="handleBgUpload(event)">
+                </label>
+                <button onclick="resetBackground()" id="reset-bg-btn" class="hidden pixel-btn px-1.5 py-1 text-[8px] bg-mcRed border-red-900" title="恢復預設背景">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+                <button onclick="openPinModal()" class="pixel-btn px-2 py-1 text-[9px] bg-mcPurple border-purple-900 flex items-center">
+                    <i class="fa-solid fa-key mr-1"></i>VIP解鎖
+                </button>
+                <div class="w-8 h-8 rounded-full bg-mcPanel border-2 border-mcGold flex items-center justify-center text-xs text-mcGold font-bold overflow-hidden" title="Ginny (魔法師)">
+                    <img src="https://placehold.co/100x100/714594/ffffff?text=G" alt="Ginny" class="w-full h-full object-cover">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-md w-full mx-auto p-3 mb-10 overflow-x-hidden">
+        
+        <!-- ================= PLAN TAB ================= -->
+        <div id="tab-plan" class="tab-content space-y-4">
+            <!-- Header banner & Weather / Ropeway Widget -->
+            <div class="pixel-box p-4 relative overflow-hidden">
+                <div class="absolute -right-6 -bottom-6 text-mcPanelBorder opacity-25 text-8xl font-black pointer-events-none">
+                    <i class="fa-solid fa-mountain-sun"></i>
+                </div>
+                <div class="flex justify-between items-start mb-3">
+                    <div>
+                        <span class="text-[9px] pixel-font bg-mcEmber px-2 py-0.5 rounded text-white inline-block mb-1 shadow">北海道 5日冒險任務</span>
+                        <h2 class="text-base font-bold text-mcGold pixel-font">遠征行程導覽</h2>
+                    </div>
+                    <div class="text-right">
+                        <span class="vt-font text-xl text-mcMuted">2026.11.08 - 11.12</span>
+                    </div>
+                </div>
+
+                <!-- Interactive Weather & Ropeway Live Simulation Widget (Day 1 requirement) -->
+                <div class="pixel-box-sm p-3 bg-mcDarker mb-3 border-l-4 border-mcEmber">
+                    <div class="flex items-center justify-between mb-2 border-b border-mcPanelBorder pb-2">
+                        <div class="flex items-center space-x-2">
+                            <i class="fa-solid fa-cloud-sun text-mcGold animate-pulse"></i>
+                            <span class="pixel-font text-[9px] text-mcGold">札幌即時氣象 & 纜車狀態</span>
+                        </div>
+                        <button onclick="refreshWeatherSimulation()" class="text-[9px] text-mcMuted hover:text-white underline">
+                            <i class="fa-solid fa-rotate-right mr-1"></i>重新整理
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-mcPanel p-2 rounded border border-mcPanelBorder">
+                            <div class="text-mcMuted text-[9px]">札幌市區天氣</div>
+                            <div id="weather-status-text" class="font-bold text-white mt-0.5 flex items-center text-[11px]">
+                                <i class="fa-solid fa-snowflake text-blue-300 mr-1"></i> 晴時多雲 3°C ~ 9°C
+                            </div>
+                        </div>
+                        <div class="bg-mcPanel p-2 rounded border border-mcPanelBorder">
+                            <div class="text-mcMuted text-[9px]">藻岩山纜車運行</div>
+                            <div id="ropeway-status-text" class="font-bold text-mcGreen mt-0.5 flex items-center text-[11px]">
+                                <i class="fa-solid fa-circle-check text-green-400 mr-1"></i> 正常運行 (10:30-22:00)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Day Selector Pills -->
+                <div id="day-selector" class="flex space-x-1.5 overflow-x-auto pb-1">
+                    <button onclick="switchDay(1)" class="day-tab-btn px-3 py-1.5 text-xs font-bold pixel-tab active text-mcGold whitespace-nowrap">Day 1</button>
+                    <button onclick="switchDay(2)" class="day-tab-btn px-3 py-1.5 text-xs font-bold pixel-tab text-mcMuted whitespace-nowrap">Day 2</button>
+                    <button onclick="switchDay(3)" class="day-tab-btn px-3 py-1.5 text-xs font-bold pixel-tab text-mcMuted whitespace-nowrap">Day 3</button>
+                    <button onclick="switchDay(4)" class="day-tab-btn px-3 py-1.5 text-xs font-bold pixel-tab text-mcMuted whitespace-nowrap">Day 4</button>
+                    <button onclick="switchDay(5)" class="day-tab-btn px-3 py-1.5 text-xs font-bold pixel-tab text-mcMuted whitespace-nowrap">Day 5</button>
+                </div>
+            </div>
+
+            <!-- Day Details Container -->
+            <div id="day-content-container" class="space-y-3">
+                <!-- Dynamically populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- ================= BOOKINGS TAB ================= -->
+        <div id="tab-bookings" class="tab-content hidden space-y-4">
+            <!-- ... existing bookings content ... -->
+            <div class="pixel-box p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h2 class="text-sm font-bold text-mcGold pixel-font"><i class="fa-solid fa-ticket mr-2"></i>機票與住宿憑證</h2>
+                    <span class="vt-font text-xs bg-mcDarker px-2 py-1 rounded text-mcMuted">VIP 權限保護</span>
+                </div>
+                <p class="text-xs text-mcMuted mb-3">重要預訂資訊與登機證。點擊「VIP解鎖」輸入 PIN 碼 (2026) 即可查看完整護照號碼與詳細代碼。</p>
+            </div>
+
+            <!-- Boarding Pass 1: TPE -> CTS -->
+            <div class="pixel-box overflow-hidden border-2 border-mcBlue">
+                <div class="bg-mcBlue px-4 py-2 flex justify-between items-center text-white">
+                    <span class="pixel-font text-[9px]">TIGERTAIR TAIWAN</span>
+                    <span class="vt-font text-lg">IT234 (去程航班)</span>
+                </div>
+                <div class="p-4 space-y-3 bg-mcDarker">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-[10px] text-mcMuted">出發地</div>
+                            <div class="text-xl font-bold font-mono">TPE</div>
+                            <div class="text-[10px] text-mcMuted">桃園國際機場 T1</div>
+                            <div class="text-xs text-mcGold font-semibold mt-1">2026-11-08 06:15 AM</div>
+                        </div>
+                        <div class="text-center px-3">
+                            <i class="fa-solid fa-plane text-mcGold text-xl animate-pulse"></i>
+                            <div class="text-[9px] text-mcMuted mt-1">直達飛行 3h 40m</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[10px] text-mcMuted">目的地</div>
+                            <div class="text-xl font-bold font-mono">CTS</div>
+                            <div class="text-[10px] text-mcMuted">新千歲機場</div>
+                            <div class="text-xs text-mcGold font-semibold mt-1">2026-11-08 10:55 AM</div>
+                        </div>
+                    </div>
+                    <div class="border-t border-dashed border-mcPanelBorder pt-3 grid grid-cols-3 gap-2 text-xs">
+                        <div>
+                            <span class="text-mcMuted text-[9px]">攻擊手</span>
+                            <div class="font-bold">Henry</div>
+                        </div>
+                        <div>
+                            <span class="text-mcMuted text-[9px]">魔法師</span>
+                            <div class="font-bold">Ginny</div>
+                        </div>
+                        <div>
+                            <span class="text-mcMuted text-[9px]">艙等/行李</span>
+                            <div class="font-bold text-mcGold">Tigersmart</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Boarding Pass 2: CTS -> TPE -->
+            <div class="pixel-box overflow-hidden border-2 border-mcPurple">
+                <div class="bg-mcPurple px-4 py-2 flex justify-between items-center text-white">
+                    <span class="pixel-font text-[9px]">TIGERTAIR TAIWAN</span>
+                    <span class="vt-font text-lg">IT235 (回程航班)</span>
+                </div>
+                <div class="p-4 space-y-3 bg-mcDarker">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <div class="text-[10px] text-mcMuted">出發地</div>
+                            <div class="text-xl font-bold font-mono">CTS</div>
+                            <div class="text-[10px] text-mcMuted">新千歲機場</div>
+                            <div class="text-xs text-mcGold font-semibold mt-1">2026-11-12 11:55 AM</div>
+                        </div>
+                        <div class="text-center px-3">
+                            <i class="fa-solid fa-plane fa-rotate-180 text-mcGold text-xl"></i>
+                            <div class="text-[9px] text-mcMuted mt-1">直達飛行 4h 40m</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[10px] text-mcMuted">目的地</div>
+                            <div class="text-xl font-bold font-mono">TPE</div>
+                            <div class="text-[10px] text-mcMuted">桃園國際機場 T1</div>
+                            <div class="text-xs text-mcGold font-semibold mt-1">2026-11-12 15:35 PM</div>
+                        </div>
+                    </div>
+                    <div class="border-t border-dashed border-mcPanelBorder pt-3 grid grid-cols-3 gap-2 text-xs">
+                        <div>
+                            <span class="text-mcMuted text-[9px]">攻擊手</span>
+                            <div class="font-bold">Henry</div>
+                        </div>
+                        <div>
+                            <span class="text-mcMuted text-[9px]">魔法師</span>
+                            <div class="font-bold">Ginny</div>
+                        </div>
+                        <div>
+                            <span class="text-mcMuted text-[9px]">艙等/行李</span>
+                            <div class="font-bold text-mcGold">Tigersmart</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hotel Accommodation Card -->
+            <div class="pixel-box p-4 border-l-4 border-mcGold">
+                <div class="flex justify-between items-start mb-2">
+                    <div>
+                        <span class="text-[9px] pixel-font bg-mcGold text-mcDark px-2 py-0.5 rounded font-bold">住宿冒險據點</span>
+                        <h3 class="font-bold text-white text-base mt-1">Mitsui Garden Hotel Sapporo West</h3>
+                    </div>
+                    <span class="vt-font text-xl text-mcGold">11/8 - 11/12</span>
+                </div>
+                <p class="text-xs text-mcMuted mb-3"><i class="fa-solid fa-location-dot mr-1 text-mcRed"></i> 札幌市中央區北5條西6丁目2-4 (近JR札幌站)</p>
+                <div class="bg-mcDarker p-3 rounded text-xs space-y-1 mb-3">
+                    <div class="flex justify-between">
+                        <span class="text-mcMuted">Check-in / Out:</span>
+                        <span class="font-bold">15:00 / 11:00</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-mcMuted">房型:</span>
+                        <span class="font-bold text-mcGold">雙人禁煙房 (4晚)</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-mcMuted">成員分攤:</span>
+                        <span class="font-bold">Henry & Ginny 均分</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vouchers & Upload Section -->
+            <div class="pixel-box p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="text-xs font-bold pixel-font text-white"><i class="fa-solid fa-folder-open mr-2 text-mcGold"></i>票券憑證上傳區</h3>
+                    <label class="pixel-btn px-2.5 py-1 text-[9px] bg-mcGreen cursor-pointer">
+                        <i class="fa-solid fa-plus mr-1"></i>上傳憑證
+                        <input type="file" id="voucher-file-input" accept="image/*" class="hidden" onchange="handleVoucherUpload(event)">
+                    </label>
+                </div>
+                <div id="vouchers-list" class="grid grid-cols-2 gap-2">
+                    <!-- Dynamic vouchers -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= WALLET TAB ================= -->
+        <div id="tab-wallet" class="tab-content hidden space-y-4">
+            <!-- Total Summary Dashboard -->
+            <div class="pixel-box p-4 bg-gradient-to-br from-mcPanel to-mcDarker border-2 border-mcGold">
+                <div class="flex justify-between items-center mb-3">
+                    <span class="pixel-font text-[9px] text-mcGold">寶物庫總計 (EXPENSES)</span>
+                    <span class="vt-font text-lg text-mcMuted">日幣 / 台幣</span>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-center">
+                    <div class="bg-mcDarker p-3 rounded border border-mcPanelBorder">
+                        <div class="text-[9px] text-mcMuted mb-1">日幣總支出 (JPY)</div>
+                        <div id="total-jpy" class="vt-font text-2xl text-mcGold font-bold">¥ 0</div>
+                    </div>
+                    <div class="bg-mcDarker p-3 rounded border border-mcPanelBorder">
+                        <div class="text-[9px] text-mcMuted mb-1">折合台幣 (TWD)</div>
+                        <div id="total-twd" class="vt-font text-2xl text-emerald-400 font-bold">$ 0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-tab selector for Wallet: List vs Category Breakdown -->
+            <div class="flex space-x-2">
+                <button onclick="switchWalletSubTab('list')" id="wallet-subtab-list-btn" class="flex-1 pixel-btn py-2 text-xs bg-mcBlue">支出明細列表</button>
+                <button onclick="switchWalletSubTab('category')" id="wallet-subtab-cat-btn" class="flex-1 pixel-btn py-2 text-xs bg-mcPanelBorder">分類統計總額</button>
+            </div>
+
+            <!-- Sub-view 1: List & Add & Calculator -->
+            <div id="wallet-view-list" class="space-y-4">
+                <!-- Quick Currency Converter Calculator -->
+                <div class="pixel-box p-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="text-xs font-bold pixel-font text-white"><i class="fa-solid fa-calculator mr-2 text-mcBlue"></i>匯率計算機</h3>
+                        <div class="text-[9px] text-mcMuted">
+                            匯率: 1 JPY = <input type="number" id="exchange-rate" value="0.21" step="0.005" class="w-14 bg-mcDarker text-mcGold text-center rounded border border-mcPanelBorder px-1" onchange="updateCalculator()"> TWD
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="relative">
+                            <input type="text" id="calc-input" placeholder="輸入算式，例: 500+200*3" class="w-full bg-mcDarker border-2 border-mcPanelBorder rounded p-2.5 text-xs text-white font-mono focus:outline-none focus:border-mcGold" onkeydown="if(event.key==='Enter') calculateMath()">
+                            <button onclick="calculateMath()" class="absolute right-2 top-2 pixel-btn px-2.5 py-1 text-[10px]">計算</button>
+                        </div>
+                        <div id="calc-result" class="bg-mcDarker p-2.5 rounded border border-mcPanelBorder flex justify-between items-center text-xs">
+                            <span class="text-mcMuted">計算結果: <span id="calc-expr-display" class="text-white font-mono">0</span></span>
+                            <span class="font-bold text-mcGold text-sm" id="calc-twd-display">≈ $0 TWD</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add Expense Form -->
+                <div class="pixel-box p-4">
+                    <h3 class="text-xs font-bold pixel-font text-white mb-3"><i class="fa-solid fa-coins mr-2 text-mcGold"></i>記帳新增</h3>
+                    <form onsubmit="addExpense(event)" class="space-y-3">
+                        <div>
+                            <label class="block text-[9px] text-mcMuted mb-1">消費品項名稱</label>
+                            <input type="text" id="exp-title" required placeholder="例如: 一幻拉麵 / 伴手禮" class="w-full bg-mcDarker border border-mcPanelBorder rounded p-2 text-xs text-white focus:outline-none focus:border-mcGold">
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[9px] text-mcMuted mb-1">日幣金額 (JPY)</label>
+                                <input type="number" id="exp-jpy" required placeholder="1200" inputmode="numeric" class="w-full bg-mcDarker border border-mcPanelBorder rounded p-2 text-xs text-white font-mono focus:outline-none focus:border-mcGold">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] text-mcMuted mb-1">類別</label>
+                                <select id="exp-category" class="w-full bg-mcDarker border border-mcPanelBorder rounded p-2 text-xs text-white focus:outline-none focus:border-mcGold">
+                                    <option value="美食">🍜 美食餐飲</option>
+                                    <option value="購物">🛍️ 購物戰利品</option>
+                                    <option value="交通">🚃 交通車資</option>
+                                    <option value="住宿">🏨 住宿費用</option>
+                                    <option value="門票">🎫 門票活動</option>
+                                    <option value="其他">📦 其他開銷</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[9px] text-mcMuted mb-1">付款人</label>
+                                <select id="exp-payer" class="w-full bg-mcDarker border border-mcPanelBorder rounded p-2 text-xs text-white focus:outline-none focus:border-mcGold">
+                                    <option value="Henry">Henry (攻擊手)</option>
+                                    <option value="Ginny">Ginny (魔法師)</option>
+                                    <option value="全體均分">全體均分</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] text-mcMuted mb-1">小票照片 (Canvas壓縮)</label>
+                                <input type="file" id="exp-img-input" accept="image/*" class="w-full text-[9px] text-mcMuted file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:text-[9px] file:font-semibold file:bg-mcPanelBorder file:text-white hover:file:bg-mcGold hover:file:text-mcDark">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full pixel-btn pixel-btn-gold py-2.5 text-xs font-bold">
+                            <i class="fa-solid fa-plus mr-1"></i>紀錄這筆花費
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Expense List & Filter -->
+                <div class="pixel-box p-4">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="text-xs font-bold pixel-font text-white">支出明細列表</h3>
+                        <select id="exp-filter" onchange="renderExpenses()" class="bg-mcDarker border border-mcPanelBorder text-xs text-mcMuted rounded px-2 py-1">
+                            <option value="all">全部分類</option>
+                            <option value="美食">美食</option>
+                            <option value="購物">購物</option>
+                            <option value="交通">交通</option>
+                            <option value="住宿">住宿</option>
+                            <option value="門票">門票</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                    <div id="expense-list" class="space-y-2 max-h-96 overflow-y-auto">
+                        <!-- Dynamic expenses -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-view 2: Category Breakdown -->
+            <div id="wallet-view-category" class="space-y-4 hidden">
+                <div class="pixel-box p-4">
+                    <h3 class="text-xs font-bold pixel-font text-mcGold mb-3"><i class="fa-solid fa-chart-pie mr-2"></i>各類別消費總金額統計</h3>
+                    <p class="text-xs text-mcMuted mb-4">清楚掌握美食、購物、交通與住宿的各項冒險開銷分佈。</p>
+                    <div id="category-breakdown-container" class="space-y-3">
+                        <!-- Dynamic category breakdown -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= JOURNAL TAB ================= -->
+        <div id="tab-journal" class="tab-content hidden space-y-4">
+            <!-- ... existing journal content ... -->
+            <div class="pixel-box p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-sm font-bold text-mcGold pixel-font"><i class="fa-solid fa-camera mr-2"></i>冒險日誌 (JOURNAL)</h2>
+                    <span class="vt-font text-xs text-mcMuted">Instagram 風格動態</span>
+                </div>
+                
+                <!-- New Journal Form -->
+                <form onsubmit="addJournal(event)" class="space-y-3 bg-mcDarker p-3 rounded border border-mcPanelBorder">
+                    <div>
+                        <label class="block text-[9px] text-mcMuted mb-1">作者選擇</label>
+                        <select id="journal-author" class="w-full bg-mcPanel border border-mcPanelBorder rounded p-2 text-xs text-white">
+                            <option value="Ginny">Ginny (魔法師)</option>
+                            <option value="Henry">Henry (攻擊手)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] text-mcMuted mb-1">心情 / 冒險文字記錄</label>
+                        <textarea id="journal-text" rows="2" required placeholder="分享今日的冒險心情與戰利品..." class="w-full bg-mcPanel border border-mcPanelBorder rounded p-2 text-xs text-white focus:outline-none focus:border-mcGold"></textarea>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <input type="file" id="journal-img-input" accept="image/*" class="text-[9px] text-mcMuted">
+                        <button type="submit" class="pixel-btn px-4 py-1.5 text-xs bg-mcGold text-mcDark font-bold">發布動態</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Journal Feed -->
+            <div id="journal-feed" class="space-y-4">
+                <!-- Dynamic journals -->
+            </div>
+        </div>
+
+        <!-- ================= LISTS TAB ================= -->
+        <div id="tab-lists" class="tab-content hidden space-y-4">
+            <div class="pixel-box p-4">
+                <div class="flex justify-between items-center mb-3">
+                    <h2 class="text-sm font-bold text-mcGold pixel-font"><i class="fa-solid fa-list-check mr-2"></i>冒險任務與裝備清單</h2>
+                    <div class="flex space-x-1">
+                        <button onclick="switchListTab('todo')" class="list-tab-btn px-2.5 py-1 text-[9px] pixel-btn bg-mcBlue">待辦</button>
+                        <button onclick="switchListTab('luggage')" class="list-tab-btn px-2.5 py-1 text-[9px] pixel-btn bg-mcPanelBorder">行李</button>
+                        <button onclick="switchListTab('shopping')" class="list-tab-btn px-2.5 py-1 text-[9px] pixel-btn bg-mcPanelBorder">購物</button>
+                    </div>
+                </div>
+
+                <!-- Add Item Form -->
+                <form onsubmit="addListItem(event)" class="flex space-x-2 mb-3">
+                    <input type="text" id="list-item-text" required placeholder="新增任務或裝備項目..." class="flex-1 bg-mcDarker border border-mcPanelBorder rounded p-2 text-xs text-white focus:outline-none focus:border-mcGold">
+                    <select id="list-item-assignee" class="bg-mcDarker border border-mcPanelBorder rounded p-2 text-xs text-white">
+                        <option value="全體">全體</option>
+                        <option value="Henry">Henry</option>
+                        <option value="Ginny">Ginny</option>
+                        <option value="Ciao">Ciao</option>
+                        <option value="Rain">Rain</option>
+                    </select>
+                    <button type="submit" class="pixel-btn px-3 py-2 text-xs">+</button>
+                </form>
+
+                <!-- Lists container -->
+                <div id="lists-container" class="space-y-2 max-h-[450px] overflow-y-auto">
+                    <!-- Dynamic check items -->
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= INFO TAB ================= -->
+        <div id="tab-info" class="tab-content hidden space-y-4">
+            <div class="pixel-box p-4 space-y-4">
+                <h2 class="text-sm font-bold text-mcGold pixel-font"><i class="fa-solid fa-compass mr-2"></i>實用情報與日本退稅新制指南</h2>
+                
+                <!-- Weather Links -->
+                <div class="space-y-2">
+                    <h3 class="text-xs font-bold text-white border-l-2 border-mcBlue pl-2">官方氣象預報</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <a href="https://www.jma.go.jp/bosai/forecast/#area_type=class20s&area_code=0110000" target="_blank" class="pixel-box-sm p-3 block hover:border-mcGold transition">
+                            <div class="text-[9px] text-mcMuted">日本氣象廳 (JMA)</div>
+                            <div class="font-bold text-xs text-mcGold mt-1">札幌氣象預報 <i class="fa-solid fa-external-link-alt text-[9px] ml-1"></i></div>
+                        </a>
+                        <a href="https://www.jma.go.jp/bosai/forecast/#area_type=class20s&area_code=0141300" target="_blank" class="pixel-box-sm p-3 block hover:border-mcGold transition">
+                            <div class="text-[9px] text-mcMuted">日本氣象廳 (JMA)</div>
+                            <div class="font-bold text-xs text-mcGold mt-1">小樽氣象預報 <i class="fa-solid fa-external-link-alt text-[9px] ml-1"></i></div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 2026 Tax Free System Breakdown -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-xs font-bold text-white border-l-2 border-mcGold pl-2">四大退稅 APP 與對應配合店家 (2026新制)</h3>
+                        <button onclick="toggleAddTaxStoreForm()" class="pixel-btn px-2 py-1 text-[9px] bg-mcGreen">
+                            <i class="fa-solid fa-plus mr-1"></i>新增店家
+                        </button>
+                    </div>
+
+                    <!-- Form to Add Custom Store -->
+                    <form id="add-tax-store-form" onsubmit="addTaxStore(event)" class="hidden bg-mcDarker p-3 rounded border border-mcGold space-y-2">
+                        <div class="text-xs font-bold text-mcGold">新增退稅配合店家</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-[9px] text-mcMuted mb-1">選擇退稅 APP / 公司</label>
+                                <select id="tax-company-select" class="w-full bg-mcPanel border border-mcPanelBorder rounded p-1.5 text-xs text-white">
+                                    <option value="J-TaxRefund">J-TaxRefund</option>
+                                    <option value="Smart Detax">Smart Detax</option>
+                                    <option value="PIE VAT">PIE VAT</option>
+                                    <option value="Global Blue">Global Blue</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] text-mcMuted mb-1">店家 / 百貨名稱</label>
+                                <input type="text" id="tax-store-name" required placeholder="例如: 友都八喜" class="w-full bg-mcPanel border border-mcPanelBorder rounded p-1.5 text-xs text-white">
+                            </div>
+                        </div>
+                        <div class="flex justify-end space-x-2 pt-1">
+                            <button type="button" onclick="toggleAddTaxStoreForm()" class="pixel-btn px-2 py-1 text-[9px] bg-mcPanelBorder">取消</button>
+                            <button type="submit" class="pixel-btn pixel-btn-gold px-3 py-1 text-[9px]">儲存店家</button>
+                        </div>
+                    </form>
+
+                    <!-- 4 Tax Free Companies Grid -->
+                    <div id="tax-companies-container" class="space-y-3">
+                        <!-- Dynamically Rendered -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= MEMBERS TAB ================= -->
+        <div id="tab-members" class="tab-content hidden space-y-4">
+            <!-- ... existing members content ... -->
+            <div class="pixel-box p-4">
+                <h2 class="text-sm font-bold text-mcGold pixel-font mb-3"><i class="fa-solid fa-users mr-2"></i>自由的感覺 - 遠征小隊</h2>
+                <p class="text-xs text-mcMuted mb-4">隊伍成員狀態管理與職階配置。</p>
+                
+                <div id="members-list-container" class="space-y-3">
+                    <!-- Dynamic Members -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-mcDarker border-t-4 border-mcPanelBorder z-40 py-2 px-1 shadow-2xl">
+        <div class="max-w-md mx-auto flex justify-around items-center">
+            <button onclick="switchTab('plan')" class="nav-btn flex flex-col items-center text-mcGold" data-tab="plan">
+                <i class="fa-solid fa-map text-base mb-0.5"></i>
+                <span class="pixel-font text-[8px]">PLAN</span>
+            </button>
+            <button onclick="switchTab('bookings')" class="nav-btn flex flex-col items-center text-mcMuted" data-tab="bookings">
+                <i class="fa-solid fa-ticket text-base mb-0.5"></i>
+                <span class="pixel-font text-[8px]">預訂</span>
+            </button>
+            <button onclick="switchTab('wallet')" class="nav-btn flex flex-col items-center text-mcMuted" data-tab="wallet">
+                <i class="fa-solid fa-wallet text-base mb-0.5"></i>
+                <span class="pixel-font text-[8px]">記帳</span>
+            </button>
+            <button onclick="switchTab('journal')" class="nav-btn flex flex-col items-center text-mcMuted" data-tab="journal">
+                <i class="fa-solid fa-camera-retro text-base mb-0.5"></i>
+                <span class="pixel-font text-[8px]">日誌</span>
+            </button>
+            <button onclick="switchTab('lists')" class="nav-btn flex flex-col items-center text-mcMuted" data-tab="lists">
+                <i class="fa-solid fa-list-check text-base mb-0.5"></i>
+                <span class="pixel-font text-[8px]">清單</span>
+            </button>
+            <button onclick="switchTab('info')" class="nav-btn flex flex-col items-center text-mcMuted" data-tab="info">
+                <i class="fa-solid fa-circle-info text-base mb-0.5"></i>
+                <span class="pixel-font text-[8px]">情報</span>
+            </button>
+            <button onclick="switchTab('members')" class="nav-btn flex flex-col items-center text-mcMuted" data-tab="members">
+                <i class="fa-solid fa-users text-base mb-0.5"></i>
+                <span class="pixel-font text-[8px]">成員</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Custom Modal for PIN & Messages -->
+    <div id="custom-modal" class="fixed inset-0 z-50 modal-backdrop hidden flex items-center justify-center p-4">
+        <div class="pixel-box p-5 max-w-sm w-full bg-mcPanel animate-bounce-short">
+            <h3 id="modal-title" class="text-sm font-bold text-mcGold pixel-font mb-2">安全驗證</h3>
+            <p id="modal-desc" class="text-xs text-mcMuted mb-4">請輸入解鎖 VIP 憑證的 PIN 碼 (提示: 當前年份)</p>
+            <div id="modal-body" class="mb-4">
+                <input type="password" id="modal-pin-input" placeholder="輸入 PIN 碼" class="w-full bg-mcDarker border border-mcPanelBorder rounded p-2 text-sm text-white text-center font-mono">
+            </div>
+            <div class="flex space-x-2">
+                <button onclick="closeModal()" class="flex-1 pixel-btn bg-mcPanelBorder py-2 text-xs">取消</button>
+                <button id="modal-confirm-btn" onclick="verifyPin()" class="flex-1 pixel-btn pixel-btn-gold py-2 text-xs font-bold">確認解鎖</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scanlines effect -->
+    <div class="absolute inset-0 scanlines pointer-events-none z-30"></div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // --- State Data & LocalStorage Initialization ---
+        const DEFAULT_MEMBERS = [
+            { name: "Henry", role: "攻擊手 (Attacker)", status: "active", avatar: "https://placehold.co/100x100/2e7fa6/ffffff?text=H" },
+            { name: "Ginny", role: "魔法師 (Mage)", status: "active", avatar: "https://placehold.co/100x100/714594/ffffff?text=G" },
+            { name: "Ciao", role: "補師 (Healer)", status: "inactive", avatar: "https://placehold.co/100x100/3e8c58/ffffff?text=C" },
+            { name: "Rain", role: "小丑 (Jester)", status: "inactive", avatar: "https://placehold.co/100x100/b8383e/ffffff?text=R" }
+        ];
+
+        const ITINERARY_DATA = {
+            1: {
+                title: "Day 1：抵達北海道 ✕ 薄野美食與市區漫步",
+                date: "2026-11-08 (日)",
+                weather: "晴時多雲 3°C ~ 9°C",
+                transportInfo: "JR 快速 Airport (約 40 分鐘 / ¥1,150) + 市區步行",
+                events: [
+                    { time: "10:55", title: "班機抵達新千歲機場 (CTS)", desc: "搭乘 Tigerair IT234 抵達新千歲機場 Terminal 1，下機通關與提行李約需 40-50 分鐘。", mapQuery: "New Chitose Airport" },
+                    { time: "11:40–12:20", title: "搭乘 JR 快速 Airport 直達 JR 札幌站", desc: "預計時間：40分鐘。費用：自由席 ¥1,150 / 指定席加 ¥840。車次密集（約 12 分鐘一班）。", transitTime: "40分鐘", transitCost: "¥1,150", mapQuery: "Sapporo Station" },
+                    { time: "12:30–14:00", title: "飯店寄放行李 ✕ 午餐 (札幌站周邊)", desc: "推薦：一幻蝦拉麵 (地下街分店)、一夜干海鮮丼 Dekitateya、奧芝商店 駅前創成寺 (湯咖哩)", foodOpts: ["一幻蝦拉麵 (¥900-1200)", "奧芝商店湯咖哩 (¥1300-1800)", "一夜干海鮮丼 (¥1500-2500)"], mapQuery: "Sapporo Station Underground" },
+                    { time: "14:30–17:00", title: "市區漫步與購物 (地下步行空間 Chi-Ka-Ho)", desc: "不受天候影響。戶外購物: Patagonia 札幌大通旗艦店、mont-bell 赤れんが Terrace。香水: Stellar Place (SHIRO等)", mapQuery: "Odori Sapporo" },
+                    { time: "17:30–19:30", title: "晚餐：成吉思汗烤羊肉 / 湯咖哩 / 根室花丸", desc: "美食推薦：達摩 (だるま) 薄野各分店 (建議 17:00 前前往候位)、GARAKU、根室花丸 Stellar Place 6F", foodOpts: ["成吉思汗 達摩 (¥2000-3500)", "根室花丸壽司 (¥1500-3000)"], mapQuery: "Susukino Sapporo" },
+                    { time: "20:00–21:30", title: "狸小路散步 ✕ 夜間聖代 (夜パフェ)", desc: "品嚐 Parfaiteria PaL 或 初期 (Initial) 精緻藝術品般的夜間聖代。", foodOpts: ["夜間聖代 (¥1200-1800)"], mapQuery: "Tanukikoji Shopping Street" }
+                ]
+            },
+            2: {
+                title: "Day 2：小樽懷舊浪漫漫旅 ✕ 堺町通甜點巡禮",
+                date: "2026-11-09 (一)",
+                weather: "多雲時晴 2°C ~ 8°C",
+                transportInfo: "JR 快速列車往復 (單程約 32 分鐘 / ¥790)",
+                events: [
+                    { time: "09:30–10:10", title: "搭乘 JR 快速列車前往 JR 小樽站", desc: "預計時間：32分鐘。費用：¥790 (單程)。去程選擇右側車窗欣賞石狩灣絕美海景。", transitTime: "32分鐘", transitCost: "¥790", mapQuery: "Otaru Station" },
+                    { time: "10:30–12:00", title: "小樽三角市場午餐 (海鮮丼)", desc: "推薦：滝波食堂、武田鮮魚店、三角亭，或若鶏時代なると本店酥炸半雞。", foodOpts: ["滝波食堂 豪邁海鮮丼 (¥2000-3500)", "若鶏時代炸半雞 (¥1200)"], mapQuery: "Otaru Sankaku Market" },
+                    { time: "12:30–16:30", title: "小樽運河與堺町通商店街散步", desc: "順向不走回頭路：三角市場 ➔ 小樽運河 ➔ 堺町通 (北一硝子、音樂盒堂) ➔ 南小樽站返回。甜點: LeTAO 本店雙層起司蛋糕、六花亭、北菓樓。", foodOpts: ["LeTAO 起司蛋糕 (¥500-1000)"], mapQuery: "Otaru Canal" },
+                    { time: "17:00–18:30", title: "晚餐：老字號 Yabuhan Soba 鴨肉蕎麥麵", desc: "品嚐在地名店 Yabuhan Soba (薮半) 鴨肉高湯蕎麥麵或壽司屋通海鮮壽司。", foodOpts: ["薮半鴨肉蕎麥 (¥1300-2200)"], mapQuery: "Yabuhan Otaru" },
+                    { time: "19:00–19:40", title: "輕鬆返回札幌", desc: "預計時間：32分鐘。費用：¥790。從南小樽站搭乘 JR 返回札幌站。", transitTime: "32分鐘", transitCost: "¥790", mapQuery: "Sapporo Station" }
+                ]
+            },
+            3: {
+                title: "Day 3：北海道神宮參拜 ✕ 市區購物 ✕ 藻岩山夜景",
+                date: "2026-11-10 (二)",
+                weather: "晴天 1°C ~ 7°C",
+                transportInfo: "地下鐵東西線 (約 10 分鐘 / ¥290) + 札幌市電 (¥210)",
+                events: [
+                    { time: "09:30–11:30", title: "北海道神宮參拜", desc: "預計時間：地鐵10分鐘。費用：¥290。搭乘地鐵東西線至圓山公園站。境內必吃六花亭神宮茶屋限定現煎「判官樣」紅豆蕎麥餅。", transitTime: "10分鐘", transitCost: "¥290", foodOpts: ["判官樣 (¥110/個)"], mapQuery: "Hokkaido Jingu" },
+                    { time: "12:00–13:30", title: "午餐：Toriton 迴轉壽司 / 和牛燒肉", desc: "品嚐北海道最強迴轉壽司 Toriton 或肉處ぎんべこや白老和牛燒肉。", foodOpts: ["Toriton 迴轉壽司 (¥2000-3500)", "白老和牛燒肉 (¥3000-5000)"], mapQuery: "Toriton Sapporo" },
+                    { time: "14:00–16:30", title: "市區核心購物：狸小路藥妝與 Sapporo PARCO", desc: "採購藥妝、伴手禮、業務超市、PARCO 潮流選品。", mapQuery: "Sapporo PARCO" },
+                    { time: "16:45–19:00", title: "【重頭戲】藻岩山纜車賞百萬夜景", desc: "預計時間：市電20分+接駁車。費用：市電 ¥210，纜車套票約 ¥2,100。搭乘市電至纜車入口站，轉乘免費接駁車與登山纜車登上山頂展望台。", transitTime: "約30分鐘", transitCost: "市電¥210 + 纜車¥2,100", mapQuery: "Mt. Moiwa Ropeway" },
+                    { time: "19:30–21:30", title: "晚餐：札幌蟹家 螃蟹會席大餐", desc: "頂級帝王蟹、松葉蟹會席料理，或彈性備案湯咖哩 Picante 札幌站前店。", foodOpts: ["札幌蟹家會席 (¥8000-15000)"], mapQuery: "Sapporo Kaniya" }
+                ]
+            },
+            4: {
+                title: "Day 4：三井 Outlet Park 札幌北廣島大採購",
+                date: "2026-11-11 (三)",
+                weather: "陰時多雲 2°C ~ 8°C",
+                transportInfo: "直達中央巴士 (單程約 50 分鐘 / ¥690)",
+                events: [
+                    { time: "10:00–10:50", title: "從札幌站前搭乘直達公車", desc: "預計時間：50分鐘。費用：單程 ¥690。前往三井 Outlet Park 札幌北廣島。", transitTime: "50分鐘", transitCost: "¥690", mapQuery: "Mitsui Outlet Park Sapporo Kitahiroshima" },
+                    { time: "11:00–16:00", title: "室內大採購與 Outlet 午餐", desc: "國際精品、戶外品牌與運動服飾大採購，於美食街享用午餐。", foodOpts: ["Outlet 美食街 (¥1000-2000)"], mapQuery: "Mitsui Outlet Park Sapporo Kitahiroshima" },
+                    { time: "16:30–18:00", title: "返回札幌站商圈", desc: "預計時間：50分鐘 (公車回程)。費用：¥690。順路逛 The North Face Sapporo Factory Shop 或 JR Tower Stellar Place。", transitTime: "50分鐘", transitCost: "¥690", mapQuery: "Sapporo Factory" },
+                    { time: "18:30–20:30", title: "晚餐：炭火串燒居酒屋 (蔵鵡 / 串鳥)", desc: "推薦：炭火鳥燒 蔵鵡 本邸 或 高 CP 值串鳥 札幌站前店。", foodOpts: ["串鳥炭火串燒 (¥2500-4000)"], mapQuery: "Kushidori Sapporo" }
+                ]
+            },
+            5: {
+                title: "Day 5：前往機場 ✕ 機場最後巡禮與返國",
+                date: "2026-11-12 (四)",
+                weather: "晴時多雲 0°C ~ 6°C",
+                transportInfo: "JR 快速 Airport (約 37 分鐘 / ¥1,150)",
+                events: [
+                    { time: "08:00–08:30", title: "飯店退房 ✕ 移動至 JR 札幌站", desc: "辦理退房手續，攜帶所有戰利品戰備行李前往車站。", mapQuery: "Mitsui Garden Hotel Sapporo West" },
+                    { time: "08:35–09:15", title: "搭乘 JR 快速 Airport 前往新千歲機場", desc: "預計時間：37-40分鐘。費用：¥1,150。快速直達新千歲機場。", transitTime: "40分鐘", transitCost: "¥1,150", mapQuery: "New Chitose Airport" },
+                    { time: "09:25–11:55", title: "機場報到與最後採購", desc: "最晚 09:30 抵達 Tigerair 櫃檯。通關前留 20-30 分鐘於國內線 2 樓採購六花亭、LeTAO、ROYCE' 生巧克力及美瑛選果玉米麵包。", foodOpts: ["美瑛選果玉米麵包 / 生巧克力 (¥1000-3000)"], mapQuery: "New Chitose Airport Terminal 2F" },
+                    { time: "11:55–15:35", title: "搭乘 Tigerair IT235 返回桃園機場", desc: "預計飛行時間：4h 40m。平安賦歸，結束美好的北海道冒險！", transitTime: "4h 40m 飛行", transitCost: "機票已預付", mapQuery: "Taoyuan International Airport T1" }
+                ]
+            }
+        };
+
+        // LocalStorage Data Hooks
+        let currentDay = 1;
+        let expenses = JSON.parse(localStorage.getItem('hokkaido_expenses')) || [
+            { id: 1, title: "一幻拉麵", jpy: 1150, category: "美食", payer: "Henry", date: "11/8", img: "" },
+            { id: 2, title: "JR 快速 Airport 車票", jpy: 1150, category: "交通", payer: "Ginny", date: "11/8", img: "" },
+            { id: 3, title: "Mitsui Garden Hotel 訂房分攤", jpy: 25000, category: "住宿", payer: "全體均分", date: "11/8", img: "" }
+        ];
+        let journals = JSON.parse(localStorage.getItem('hokkaido_journals')) || [
+            { id: 1, author: "Ginny", text: "抵達北海道第一天！Minecraft Dungeons 冒險風格的網頁太酷啦，一幻拉麵神美味！", img: "https://placehold.co/600x400/2e7fa6/ffffff?text=Hokkaido+Day1", date: "2026-11-08 14:20" }
+        ];
+        let lists = JSON.parse(localStorage.getItem('hokkaido_lists')) || {
+            todo: [
+                { id: 1, text: "確認護照有效期與 Visit Japan Web 申報", assignee: "全體", done: true, type: "todo" },
+                { id: 2, text: "預約藻岩山纜車與札幌蟹家晚餐", assignee: "Henry", done: true, type: "todo" }
+            ],
+            luggage: [
+                { id: 1, text: "保暖發熱衣、羽絨外套、雪靴", assignee: "全體", done: false, type: "luggage" },
+                { id: 2, text: "行動電源、網卡 / eSIM", assignee: "Ginny", done: true, type: "luggage" }
+            ],
+            shopping: [
+                { id: 1, text: "六花亭薩斯餅 / LeTAO 起司蛋糕", assignee: "全體", done: false, type: "shopping" },
+                { id: 2, text: "北海道限定白色戀人 & ROYCE 生巧克力", assignee: "全體", done: false, type: "shopping" }
+            ]
+        };
+        let vouchers = JSON.parse(localStorage.getItem('hokkaido_vouchers')) || [
+            { id: 1, name: "Mitsui Garden Hotel 訂房確認書", img: "https://placehold.co/400x300/161d26/f5c451?text=Hotel+Voucher" }
+        ];
+        let members = JSON.parse(localStorage.getItem('hokkaido_members')) || DEFAULT_MEMBERS;
+        let activeListCategory = 'todo';
+        let walletSubTab = 'list';
+        let isUnlocked = false;
+
+        // --- Initialization on Load ---
+        window.onload = function() {
+            renderDayContent(currentDay);
+            renderExpenses();
+            renderCategoryBreakdown();
+            renderJournals();
+            renderLists();
+            renderVouchers();
+            renderMembers();
+            updateCalculator();
+        };
+
+        // --- Tab Navigation Switcher ---
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-mcGold');
+                btn.classList.add('text-mcMuted');
+                if(btn.dataset.tab === tabId) {
+                    btn.classList.remove('text-mcMuted');
+                    btn.classList.add('text-mcGold');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- Wallet Sub-tab Switcher ---
+        function switchWalletSubTab(subTab) {
+            walletSubTab = subTab;
+            const listBtn = document.getElementById('wallet-subtab-list-btn');
+            const catBtn = document.getElementById('wallet-subtab-cat-btn');
+            const listDiv = document.getElementById('wallet-view-list');
+            const catDiv = document.getElementById('wallet-view-category');
+
+            if(subTab === 'list') {
+                listBtn.className = "flex-1 pixel-btn py-2 text-xs bg-mcBlue";
+                catBtn.className = "flex-1 pixel-btn py-2 text-xs bg-mcPanelBorder";
+                listDiv.classList.remove('hidden');
+                catDiv.classList.add('hidden');
+            } else {
+                catBtn.className = "flex-1 pixel-btn py-2 text-xs bg-mcBlue";
+                listBtn.className = "flex-1 pixel-btn py-2 text-xs bg-mcPanelBorder";
+                catDiv.classList.remove('hidden');
+                listDiv.classList.add('hidden');
+                renderCategoryBreakdown();
+            }
+        }
+
+        // --- PLAN: Day Switcher & Weather Simulation ---
+        function switchDay(day) {
+            currentDay = day;
+            document.querySelectorAll('.day-tab-btn').forEach((btn, idx) => {
+                btn.classList.remove('active', 'text-mcGold');
+                btn.classList.add('text-mcMuted');
+                if(idx + 1 === day) {
+                    btn.classList.add('active', 'text-mcGold');
+                    btn.classList.remove('text-mcMuted');
+                }
+            });
+            renderDayContent(day);
+        }
+
+        function refreshWeatherSimulation() {
+            const weathers = [
+                { text: "晴時多雲 3°C ~ 9°C", icon: "fa-snowflake text-blue-300", ropeway: "正常運行 (10:30-22:00)", ropewayClass: "text-mcGreen" },
+                { text: "微雪飄落 -1°C ~ 4°C", icon: "fa-snowflake text-white animate-spin", ropeway: "視強風天候可能調整", ropewayClass: "text-yellow-400" },
+                { text: "晴朗好天氣 5°C ~ 12°C", icon: "fa-sun text-mcGold", ropeway: "完美運行 (視野極佳)", ropewayClass: "text-mcGreen" }
+            ];
+            const rand = weathers[Math.floor(Math.random() * weathers.length)];
+            document.getElementById('weather-status-text').innerHTML = `<i class="fa-solid ${rand.icon} mr-1"></i> ${rand.text}`;
+            document.getElementById('ropeway-status-text').innerHTML = `<i class="fa-solid fa-circle-check ${rand.ropewayClass} mr-1"></i> ${rand.ropeway}`;
+        }
+
+        function renderDayContent(day) {
+            const data = ITINERARY_DATA[day];
+            const container = document.getElementById('day-content-container');
+            
+            let html = `
+                <div class="pixel-box p-3 bg-mcDarker mb-2 flex justify-between items-center">
+                    <div>
+                        <span class="text-[9px] text-mcGold pixel-font">${data.date}</span>
+                        <h3 class="text-xs font-bold text-white mt-0.5">${data.title}</h3>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-[9px] bg-mcPanel border border-mcPanelBorder px-2 py-1 rounded text-mcMuted">
+                            <i class="fa-solid fa-train text-mcGold mr-1"></i>${data.transportInfo}
+                        </span>
+                    </div>
+                </div>
+                <div class="space-y-3">
+            `;
+
+            data.events.forEach((ev, idx) => {
+                let foodHtml = '';
+                if(ev.foodOpts) {
+                    foodHtml = `<div class="mt-2 flex flex-wrap gap-1">`;
+                    ev.foodOpts.forEach(f => {
+                        foodHtml += `<span class="text-[9px] bg-mcDarker border border-mcPanelBorder text-mcGold px-2 py-0.5 rounded"><i class="fa-solid fa-utensils mr-1"></i>${f}</span>`;
+                    });
+                    foodHtml += `</div>`;
+                }
+
+                let transitBadge = '';
+                if(ev.transitTime && ev.transitCost) {
+                    transitBadge = `
+                        <div class="my-1.5 inline-flex items-center space-x-2 bg-mcDarker px-2 py-1 rounded border border-mcPanelBorder text-[10px]">
+                            <span class="text-mcGold"><i class="fa-solid fa-clock mr-1"></i>預計時間: ${ev.transitTime}</span>
+                            <span class="text-mcMuted">|</span>
+                            <span class="text-emerald-400 font-bold"><i class="fa-solid fa-ticket mr-1"></i>預計費用: ${ev.transitCost}</span>
+                        </div>
+                    `;
+                }
+
+                html += `
+                    <div class="pixel-box p-3 border-l-4 border-mcEmber relative">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="vt-font text-lg text-mcGold">${ev.time}</span>
+                            <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(ev.mapQuery)}" target="_blank" class="text-[9px] pixel-btn px-2 py-1 bg-mcBlue flex items-center">
+                                <i class="fa-solid fa-map-location-dot mr-1"></i>Google Maps
+                            </a>
+                        </div>
+                        <h4 class="font-bold text-white text-xs mb-1">${ev.title}</h4>
+                        <p class="text-xs text-mcMuted leading-relaxed">${ev.desc}</p>
+                        ${transitBadge}
+                        ${foodHtml}
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+            container.innerHTML = html;
+        }
+
+        // --- BOOKINGS & PIN Modal ---
+        function openPinModal() {
+            document.getElementById('custom-modal').classList.remove('hidden');
+            document.getElementById('modal-pin-input').value = '';
+            document.getElementById('modal-pin-input').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.add('hidden');
+        }
+
+        function verifyPin() {
+            const val = document.getElementById('modal-pin-input').value;
+            if(val === '2026') {
+                isUnlocked = true;
+                closeModal();
+                alertBox("VIP 權限解鎖成功！憑證與安全資料已完全展開。");
+            } else {
+                alertBox("PIN 碼錯誤！提示為當前年份 (2026)。");
+            }
+        }
+
+        function alertBox(msg) {
+            document.getElementById('modal-title').innerText = "系統提示";
+            document.getElementById('modal-desc').innerText = msg;
+            document.getElementById('modal-body').innerHTML = "";
+            document.getElementById('modal-confirm-btn').innerText = "確定";
+            document.getElementById('modal-confirm-btn').onclick = closeModal;
+            document.getElementById('custom-modal').classList.remove('hidden');
+        }
+
+        function handleVoucherUpload(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            compressImageToCanvas(file, 600, 600, 0.7, (base64) => {
+                vouchers.push({ id: Date.now(), name: file.name, img: base64 });
+                localStorage.setItem('hokkaido_vouchers', JSON.stringify(vouchers));
+                renderVouchers();
+            });
+        }
+
+        function renderVouchers() {
+            const container = document.getElementById('vouchers-list');
+            if(vouchers.length === 0) {
+                container.innerHTML = `<div class="col-span-2 text-center text-xs text-mcMuted py-4">尚無上傳憑證</div>`;
+                return;
+            }
+            let html = '';
+            vouchers.forEach(v => {
+                html += `
+                    <div class="pixel-box-sm overflow-hidden bg-mcDarker p-2 relative group">
+                        <img src="${v.img}" alt="${v.name}" class="w-full h-24 object-cover rounded mb-1">
+                        <div class="text-[9px] text-white truncate">${v.name}</div>
+                        <button onclick="deleteVoucher(${v.id})" class="absolute top-1 right-1 bg-mcRed text-white w-5 h-5 rounded flex items-center justify-center text-[9px] opacity-80 hover:opacity-100">×</button>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function deleteVoucher(id) {
+            vouchers = vouchers.filter(v => v.id !== id);
+            localStorage.setItem('hokkaido_vouchers', JSON.stringify(vouchers));
+            renderVouchers();
+        }
+
+        // --- WALLET: Calculator & Expenses & Category Breakdown ---
+        function updateCalculator() {
+            const expr = document.getElementById('calc-input').value;
+            const rate = parseFloat(document.getElementById('exchange-rate').value) || 0.21;
+            document.getElementById('calc-expr-display').innerText = expr || '0';
+            try {
+                const sanitized = expr.replace(/[^0-9+\-*/().]/g, '');
+                const result = sanitized ? eval(sanitized) : 0;
+                const twd = Math.round(result * rate);
+                document.getElementById('calc-twd-display').innerText = `≈ $${twd.toLocaleString()} TWD`;
+            } catch(e) {
+                document.getElementById('calc-twd-display').innerText = "運算錯誤";
+            }
+        }
+
+        document.getElementById('calc-input').addEventListener('input', updateCalculator);
+
+        function calculateMath() {
+            updateCalculator();
+        }
+
+        function compressImageToCanvas(file, maxWidth, maxHeight, quality, callback) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', quality);
+                    callback(dataUrl);
+                }
+                img.src = e.target.result;
+            }
+            reader.readAsDataURL(file);
+        }
+        // Default Tax Free Companies Data based on User Image Screenshot
+        const DEFAULT_TAX_DATA = {
+            "J-TaxRefund": ["唐吉訶德 (DONKI)", "Bic Camera", "大國藥妝", "松本清", "Sugi藥局"],
+            "Smart Detax": ["3COINS", "AEON Mall", "阿卡將本舖", "PARCO百貨", "HANDS"],
+            "PIE VAT": ["三井 Outlet Park全系列", "LaLaport", "Montbell 門市", "東急 Plaza"],
+            "Global Blue": ["高島屋", "三越伊勢丹", "大丸松坂屋", "阪急百貨", "國際精品專櫃"]
+        };
+
+        let customTaxStores = JSON.parse(localStorage.getItem('hokkaido_tax_stores')) || DEFAULT_TAX_DATA;
+        let savedBgImage = localStorage.getItem('hokkaido_bg_image') || "";
+
+        // Initial setup
+        const originalOnload = window.onload;
+        window.onload = function() {
+            if (originalOnload) originalOnload();
+            renderTaxCompanies();
+            applySavedBackground();
+        };
+
+        // --- Custom Background Upload Handlers ---
+        function handleBgUpload(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+            compressImageToCanvas(file, 1080, 1920, 0.75, (base64) => {
+                savedBgImage = base64;
+                localStorage.setItem('hokkaido_bg_image', base64);
+                applySavedBackground();
+            });
+        }
+
+        function applySavedBackground() {
+            const resetBtn = document.getElementById('reset-bg-btn');
+            if(savedBgImage) {
+                document.body.style.backgroundImage = `linear-gradient(rgba(7, 9, 13, 0.75), rgba(7, 9, 13, 0.88)), url('${savedBgImage}')`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundAttachment = 'fixed';
+                if(resetBtn) resetBtn.classList.remove('hidden');
+            } else {
+                document.body.style.backgroundImage = `
+                    radial-gradient(circle at 20% 30%, rgba(46, 127, 166, 0.12) 0%, transparent 40%),
+                    radial-gradient(circle at 80% 70%, rgba(255, 119, 34, 0.08) 0%, transparent 40%),
+                    linear-gradient(to bottom, #07090d, #0d1117)`;
+                if(resetBtn) resetBtn.classList.add('hidden');
+            }
+        }
+
+        function resetBackground() {
+            savedBgImage = "";
+            localStorage.removeItem('hokkaido_bg_image');
+            applySavedBackground();
+        }
+
+        // --- INFO: Tax-Free Stores Functionality ---
+        function toggleAddTaxStoreForm() {
+            const form = document.getElementById('add-tax-store-form');
+            form.classList.toggle('hidden');
+        }
+
+        function addTaxStore(e) {
+            e.preventDefault();
+            const company = document.getElementById('tax-company-select').value;
+            const name = document.getElementById('tax-store-name').value.trim();
+
+            if(!customTaxStores[company]) {
+                customTaxStores[company] = [];
+            }
+            if(name && !customTaxStores[company].includes(name)) {
+                customTaxStores[company].push(name);
+                localStorage.setItem('hokkaido_tax_stores', JSON.stringify(customTaxStores));
+                renderTaxCompanies();
+                document.getElementById('tax-store-name').value = '';
+                toggleAddTaxStoreForm();
+            }
+        }
+
+        function deleteTaxStore(company, storeName) {
+            if(customTaxStores[company]) {
+                customTaxStores[company] = customTaxStores[company].filter(s => s !== storeName);
+                localStorage.setItem('hokkaido_tax_stores', JSON.stringify(customTaxStores));
+                renderTaxCompanies();
+            }
+        }
+
+        function renderTaxCompanies() {
+            const container = document.getElementById('tax-companies-container');
+            if(!container) return;
+
+            const companyConfigs = {
+                "J-TaxRefund": { icon: "fa-mobile-screen-button", color: "text-mcGold", border: "border-mcGold" },
+                "Smart Detax": { icon: "fa-qrcode", color: "text-mcEmber", border: "border-mcEmber" },
+                "PIE VAT": { icon: "fa-receipt", color: "text-mcBlue", border: "border-mcBlue" },
+                "Global Blue": { icon: "fa-globe", color: "text-emerald-400", border: "border-emerald-500" }
+            };
+
+            let html = '';
+            for(let key in customTaxStores) {
+                const config = companyConfigs[key] || { icon: "fa-store", color: "text-white", border: "border-mcPanelBorder" };
+                const stores = customTaxStores[key] || [];
+
+                let storeBadges = '';
+                stores.forEach(st => {
+                    storeBadges += `
+                        <span class="inline-flex items-center space-x-1 bg-mcDarker border border-mcPanelBorder text-white text-[10px] px-2 py-1 rounded">
+                            <span>${st}</span>
+                            <button onclick="deleteTaxStore('${key}', '${st}')" class="text-mcRed hover:text-red-400 ml-1">×</button>
+                        </span>
+                    `;
+                });
+
+                html += `
+                    <div class="pixel-box-sm p-3 bg-mcPanel border-l-4 ${config.border}">
+                        <div class="flex items-center space-x-2 mb-2 border-b border-mcPanelBorder pb-1.5">
+                            <i class="fa-solid ${config.icon} ${config.color} text-sm"></i>
+                            <h4 class="font-bold text-xs text-white">退稅 APP：<span class="${config.color}">${key}</span></h4>
+                        </div>
+                        <div class="text-[10px] text-mcMuted mb-2">主要使用通路與百貨：</div>
+                        <div class="flex flex-wrap gap-1.5">
+                            ${storeBadges || '<span class="text-[9px] text-mcMuted">暫無店家</span>'}
+                        </div>
+                    </div>
+                `;
+            }
+            container.innerHTML = html;
+        }
+
+        function deleteExpense(id) {
+            expenses = expenses.filter(ex => ex.id !== id);
+            localStorage.setItem('hokkaido_expenses', JSON.stringify(expenses));
+            renderExpenses();
+            renderCategoryBreakdown();
+        }
+
+        // --- JOURNAL: Instagram/Blog Style ---
+        function addJournal(e) {
+            e.preventDefault();
+            const author = document.getElementById('journal-author').value;
+            const text = document.getElementById('journal-text').value;
+            const fileInput = document.getElementById('journal-img-input');
+
+            const saveJ = (imgData) => {
+                const now = new Date();
+                const dateStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')} ${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}`;
+                const newJ = {
+                    id: Date.now(),
+                    author,
+                    text,
+                    img: imgData || "",
+                    date: dateStr
+                };
+                journals.unshift(newJ);
+                localStorage.setItem('hokkaido_journals', JSON.stringify(journals));
+                renderJournals();
+                e.target.reset();
+            };
+
+            if(fileInput.files[0]) {
+                compressImageToCanvas(fileInput.files[0], 800, 800, 0.7, saveJ);
+            } else {
+                saveJ("");
+            }
+        }
+
+        function renderJournals() {
+            const container = document.getElementById('journal-feed');
+            if(journals.length === 0) {
+                container.innerHTML = `<div class="pixel-box p-4 text-center text-xs text-mcMuted">目前尚無冒險日誌，趕快發布第一篇動態吧！</div>`;
+                return;
+            }
+            let html = '';
+            journals.forEach(j => {
+                html += `
+                    <div class="pixel-box overflow-hidden">
+                        <div class="p-3 flex justify-between items-center bg-mcDarker border-b border-mcPanelBorder">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-7 h-7 rounded-full bg-mcPanel border border-mcGold flex items-center justify-center text-xs font-bold text-mcGold">
+                                    ${j.author.charAt(0)}
+                                </div>
+                                <span class="text-xs font-bold text-white">${j.author}</span>
+                            </div>
+                            <span class="vt-font text-xs text-mcMuted">${j.date}</span>
+                        </div>
+                        ${j.img ? `<img src="${j.img}" class="w-full max-h-72 object-cover">` : ''}
+                        <div class="p-3 text-xs leading-relaxed text-mcText">
+                            ${j.text}
+                        </div>
+                        <div class="px-3 pb-3 flex justify-between items-center text-[9px] text-mcMuted border-t border-mcPanelBorder pt-2">
+                            <span><i class="fa-solid fa-heart text-mcRed mr-1"></i> 自由的感覺小隊</span>
+                            <button onclick="deleteJournal(${j.id})" class="text-mcRed hover:underline">刪除</button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        function deleteJournal(id) {
+            journals = journals.filter(j => j.id !== id);
+            localStorage.setItem('hokkaido_journals', JSON.stringify(journals));
+            renderJournals();
+        }
+
+        // --- LISTS: Checklists ---
+        function switchListTab(cat) {
+            activeListCategory = cat;
+            document.querySelectorAll('.list-tab-btn').forEach(btn => {
+                btn.className = "list-tab-btn px-2.5 py-1 text-[9px] pixel-btn bg-mcPanelBorder";
+            });
+            event.target.className = "list-tab-btn px-2.5 py-1 text-[9px] pixel-btn bg-mcBlue";
+            renderLists();
+        }
+
+        function addListItem(e) {
+            e.preventDefault();
+            const text = document.getElementById('list-item-text').value;
+            const assignee = document.getElementById('list-item-assignee').value;
+
+            lists[activeListCategory].push({
+                id: Date.now(),
+                text,
+                assignee,
+                done: false,
+                type: activeListCategory
+            });
+            localStorage.setItem('hokkaido_lists', JSON.stringify(lists));
+            renderLists();
+            document.getElementById('list-item-text').value = '';
+        }
+
+        function toggleListItem(cat, id) {
+            const item = lists[cat].find(i => i.id === id);
+            if(item) {
+                item.done = !item.done;
+                localStorage.setItem('hokkaido_lists', JSON.stringify(lists));
+                renderLists();
+            }
+        }
+
+        function deleteListItem(cat, id) {
+            lists[cat] = lists[cat].filter(i => i.id !== id);
+            localStorage.setItem('hokkaido_lists', JSON.stringify(lists));
+            renderLists();
+        }
+
+        function renderLists() {
+            const container = document.getElementById('lists-container');
+            const items = lists[activeListCategory];
+
+            if(items.length === 0) {
+                container.innerHTML = `<div class="text-center text-xs text-mcMuted py-4">此清單目前沒有項目</div>`;
+                return;
+            }
+
+            let html = '';
+            items.forEach(item => {
+                html += `
+                    <div class="pixel-box-sm p-2.5 bg-mcDarker flex items-center justify-between text-xs">
+                        <label class="flex items-center space-x-2 cursor-pointer flex-1">
+                            <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleListItem('${activeListCategory}', ${item.id})" class="w-4 h-4 rounded bg-mcPanel border-mcPanelBorder text-mcGold focus:ring-0">
+                            <span class="${item.done ? 'line-through text-mcMuted' : 'text-white'}">${item.text}</span>
+                        </label>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[9px] bg-mcPanel px-1.5 py-0.5 rounded text-mcGold border border-mcPanelBorder">${item.assignee}</span>
+                            <button onclick="deleteListItem('${activeListCategory}', ${item.id})" class="text-mcRed hover:text-red-400"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // --- MEMBERS: Member list management ---
+        function renderMembers() {
+            const container = document.getElementById('members-list-container');
+            let html = '';
+            members.forEach(m => {
+                html += `
+                    <div class="pixel-box-sm p-3 bg-mcDarker flex items-center justify-between">
+                        <div class="flex items-center space-x-3">
+                            <img src="${m.avatar}" class="w-10 h-10 rounded border-2 border-mcGold object-cover">
+                            <div>
+                                <div class="font-bold text-white text-xs">${m.name}</div>
+                                <div class="text-[9px] text-mcMuted">${m.role}</div>
+                            </div>
+                        </div>
+                        <div>
+                            <span class="text-[9px] px-2 py-1 rounded font-bold ${m.status === 'active' ? 'bg-mcGreen text-white' : 'bg-mcPanelBorder text-mcMuted'}">
+                                ${m.status === 'active' ? '參戰中' : '本次未參與'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
