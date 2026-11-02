@@ -11,16 +11,56 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <!-- Babel for JSX compilation in browser -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      import { getFirestore, collection, doc, setDoc, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+      window.FirebaseSDK = { initializeApp, getAuth, signInAnonymously, onAuthStateChanged, getFirestore, collection, doc, setDoc, addDoc, onSnapshot };
+    </script>
 </head>
 <body class="bg-black text-white">
     <div id="root"></div>
 
-    <!-- 載入 App.jsx -->
-    <script type="text/babel" src="./App.jsx"></script>
     <script type="text/babel">
-        const container = document.getElementById('root');
-        const root = ReactDOM.createRoot(container);
-        root.render(<App />);
-    </script>
-</body>
-</html>
+        const { useState, useEffect, useMemo } = React;
+        
+        // ---------------------------------------------------------------------------
+        // MEMBER & ITINERARY DATA
+        // ---------------------------------------------------------------------------
+        const MEMBERS = [
+          { id: 'ginny', name: 'Ginny', role: '隊長 / 魔法師 (Mage)', class: 'Spellcaster', hp: '100/100', status: 'ONLINE', isPresent: true, avatar: '🧙‍♀️', armor: 'Enchanted Silk Robe' },
+          { id: 'henry', name: 'Henry (H)', role: '先鋒 / 攻擊手 (Attacker / DPS)', class: 'Berserker', hp: '120/120', status: 'ONLINE', isPresent: true, avatar: '⚔️', armor: 'Netherite Armor' },
+          { id: 'ciao', name: 'Ciao', role: '坦克 (Tank)', class: 'Paladin', hp: '0/150', status: 'OFFLINE', isPresent: false, avatar: '🛡️', armor: 'Iron Plate Mail (未參與)' },
+          { id: 'rain', name: 'Rain', role: '小丑 (Jester)', class: 'Trickster', hp: '0/80', status: 'OFFLINE', isPresent: false, avatar: '🤡', armor: 'Leather Tunic (未參與)' },
+          { id: 'everyone', name: '出征小隊 (Active Guild)', role: 'Party', class: 'Adventurers', hp: 'MAX', status: 'ONLINE', isPresent: true, avatar: '✨', armor: 'Full Winter Gear' }
+        ];
+
+        const ITINERARY_DATA = [
+          {
+            day: 1,
+            date: '2026-11-08',
+            dateLabel: '11/08 (日)',
+            title: '抵達北海道 ✕ 薄野美食與市區漫步',
+            weather: { condition: '多雲偶雪 ❄️', temp: '4°C / -1°C', ropewayStatus: '運行中 (Normal Operational)' },
+            events: [
+              { id: 'e1', time: '06:15 - 10:55', type: 'transport', label: '交通', title: 'TPE 桃園 ➔ CTS 新千歲 (IT234)', desc: '班機抵達 CTS，通關與提行李約需 40–50 分鐘。', cost: '已內含於機票預約', note: '極速通關，領取行李及日本網卡。', map: 'New Chitose Airport' },
+              { id: 'e2', time: '11:40 - 12:20', type: 'transport', label: '交通', title: '搭乘 JR 快速 Airport 直達札幌站', desc: '車程約 40 分鐘，班次約 12 分鐘一班。', cost: '自由席 ¥1,150 / 指定席 ¥1,990', note: '可用 IC 卡刷入搭乘。', map: 'Sapporo Station' },
+              { id: 'e3', time: '12:30 - 14:00', type: 'hotel', label: '住宿 / 午餐', title: '三井花園飯店 札幌西 Check-in 寄放行李 ✕ 午餐', desc: '飯店: Mitsui Garden Hotel Sapporo West', foodOptions: ['一幻蝦拉麵 (札幌站地下街): 濃郁鮮蝦湯底 ¥900–¥1,200', '一夜干海鮮丼 Dekitateya (Stellar Place 6F): ¥1,500–¥2,500'], note: '中午先寄放大型行李。', map: 'Mitsui Garden Hotel Sapporo West' },
+              { id: 'e4', time: '14:30 - 17:00', type: 'sightseeing', label: '景點 / 下午茶', title: '地下步行街 Chi-Ka-Ho 散步 ✕ 下午茶', desc: '雨雪走地下道 Chi-Ka-Ho 直通大通商圈。', foodOptions: ['KINOTOYA Cafe: 極濃牛奶霜淇淋 ~¥450', '北菓樓 札幌本館: 夢不思議大泡芙 ~¥300'], cost: '地下街免費', map: 'Sapporo Underground Pedestrian Space' },
+              { id: 'e5', time: '17:30 - 19:30', type: 'food', label: '美食晚餐', title: '晚餐：成吉思汗烤羊肉 / 湯咖哩', desc: '薄野精選美食，暖身必吃！', foodOptions: ['成吉思汗烤羊肉 達摩 (だるま): ~¥2,000–¥4,000', '湯咖哩備案 (GARAKU / Suage+): ~¥1,400–¥2,000'], map: 'Daruma Susukino' },
+              { id: 'e6', time: '20:00 - 21:30', type: 'food', label: '宵夜甜點', title: '狸小路散步 ✕ 夜間聖代 (夜パフェ)', desc: '體驗札幌獨特文化：藝術夜間甜點聖代！', foodOptions: ['Parfaiteria PaL 或 Initial: 藝術夜間聖代 ~¥1,800–¥2,500'], map: 'Parfaiteria PaL' }
+            ]
+          },
+          {
+            day: 2,
+            date: '2026-11-09',
+            dateLabel: '11/09 (一)',
+            title: '小樽懷舊浪漫漫旅 ✕ 堺町通甜點巡禮',
+            weather: { condition: '晴時多雲 ☀️', temp: '5°C / 0°C', ropewayStatus: '運行中 (Normal Operational)' },
+            events: [
+              { id: 'e7', time: '09:30 - 10:10', type: 'transport', label: '交通', title: 'JR 快速列車：札幌 ➔ 小樽', desc: '右側車窗欣賞石狩灣海景。', cost: '自由席 ¥750 / 指定席 ¥1,590', map: 'Otaru Station' },
+              { id: 'e8', time: '10:30 - 12:00', type: 'food', label: '午餐', title: '午餐：小樽三角市場海鮮丼', desc: '品嚐新鮮海鮮丼與在地名物！', foodOptions: ['三角市場 滝波食堂 / 武田鮮魚店: ~¥2,500–¥4,500'], map: 'Sankaku Market Otaru' },
+              { id: 'e9', time: '12:30 - 16:30', type: 'sightseeing', label: '景點 / 甜點', title: '小樽運河 ➔ 堺町通商店街漫步', desc: '參觀北一硝子、小樽音樂盒堂。', foodOptions: ['LeTAO 本店: 雙層起司蛋糕 ~¥1,000–¥1,500'], cost: '景點免費散步', map: 'Otaru Canal' },
+              { id: 'e10', time: '17:00 - 18:30', type: 'food', label: '晚餐', title: '晚餐：小樽在地老字號名店', desc: '傳統蕎麥麵與壽司。', foodOptions: ['薮半 (Yabuhan Soba): 鴨肉高湯蕎麥麵 ~¥1,200–¥1,800'], map: 'Yabuhan Soba' },
+              { id: 'e11', time: '19:00 - 19:40', type: 'transport', label: '交通', title: '搭乘 JR 返回札幌
