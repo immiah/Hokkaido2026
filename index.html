@@ -17,19 +17,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* Minecraft Dungeons Dark Forest & Fiery Ember Custom Styling */
+        /* Minecraft Dungeons Winter & Autumn Forest Bright Adventure Styling */
         body {
-            background-color: #07090d;
+            background-color: #0f172a;
             background-image: 
-                linear-gradient(rgba(7, 9, 13, 0.72), rgba(7, 9, 13, 0.88)),
-                url('./bg.jpg'),
-                radial-gradient(circle at 20% 30%, rgba(46, 127, 166, 0.12) 0%, transparent 40%),
-                radial-gradient(circle at 80% 70%, rgba(255, 119, 34, 0.08) 0%, transparent 40%),
-                linear-gradient(to bottom, #07090d, #0d1117);
+                linear-gradient(rgba(15, 23, 42, 0.2), rgba(15, 23, 42, 0.4)),
+                url('./bg.png'),
+                url('./bg.jpg');
             background-size: cover;
-            background-position: center;
+            background-position: center top;
             background-attachment: fixed;
-            color: #e2e6ef;
+            color: #f8fafc;
             font-family: 'Inter', sans-serif;
             touch-action: manipulation;
         }
@@ -42,97 +40,104 @@
             font-family: 'VT323', monospace;
         }
 
-        /* Minecraft Dungeons Pixel Border & Box Shadow FX */
+        /* Ultra High Transparency Glassmorphism Pixel Box for Max Background Visibility */
         .pixel-box {
-            background-color: rgba(22, 27, 38, 0.88);
-            border: 4px solid #3c4456;
+            background-color: rgba(15, 23, 42, 0.25);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1.5 solid rgba(186, 230, 253, 0.25);
             box-shadow: 
-                inset 2px 2px 0px rgba(255, 255, 255, 0.1),
-                inset -2px -2px 0px rgba(0, 0, 0, 0.6),
-                0 4px 10px rgba(0, 0, 0, 0.7);
+                inset 1px 1px 0px rgba(255, 255, 255, 0.1),
+                0 4px 15px rgba(0, 0, 0, 0.25);
+            border-radius: 8px;
             position: relative;
         }
 
         .pixel-box-gold {
-            background-color: rgba(28, 23, 16, 0.92);
-            border: 4px solid #f3c653;
+            background-color: rgba(30, 27, 18, 0.35);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
+            border: 1.5px solid rgba(251, 191, 36, 0.4);
             box-shadow: 
-                inset 2px 2px 0px #ffe596,
-                inset -2px -2px 0px #b8860b,
-                0 0 12px rgba(243, 198, 83, 0.3);
+                inset 1px 1px 0px rgba(254, 240, 138, 0.2),
+                0 0 12px rgba(251, 191, 36, 0.15);
+            border-radius: 8px;
         }
 
         .pixel-btn {
-            background: linear-gradient(to bottom, #4a5468, #2a303c);
-            border: 3px solid #1a1e26;
-            box-shadow: inset 1px 1px 0px rgba(255,255,255,0.3), inset -1px -1px 0px rgba(0,0,0,0.5);
-            transition: all 0.1s ease;
+            background: linear-gradient(to bottom, rgba(2, 132, 199, 0.55), rgba(3, 105, 161, 0.65));
+            border: 1px solid rgba(125, 211, 252, 0.35);
+            backdrop-filter: blur(4px);
+            border-radius: 6px;
+            box-shadow: inset 1px 1px 0px rgba(255,255,255,0.25);
+            transition: all 0.15s ease;
         }
 
         .pixel-btn:active {
-            transform: translateY(2px);
-            box-shadow: inset -1px -1px 0px rgba(255,255,255,0.3), inset 1px 1px 0px rgba(0,0,0,0.5);
+            transform: translateY(1px);
+            background: linear-gradient(to bottom, rgba(3, 105, 161, 0.8), rgba(2, 132, 199, 0.7));
         }
 
         .pixel-btn-gold {
-            background: linear-gradient(to bottom, #f5d061, #d49a18);
-            border: 3px solid #784e03;
-            color: #1a1300;
+            background: linear-gradient(to bottom, rgba(251, 191, 36, 0.75), rgba(217, 119, 6, 0.75));
+            border: 1px solid rgba(254, 240, 138, 0.5);
+            color: #451a03;
             font-weight: bold;
-            box-shadow: inset 1px 1px 0px #fff2bc, inset -1px -1px 0px #8f6400;
+            border-radius: 6px;
+            box-shadow: inset 1px 1px 0px #fef08a;
         }
 
         .pixel-btn-gold:active {
-            transform: translateY(2px);
-            background: linear-gradient(to bottom, #d49a18, #f5d061);
+            transform: translateY(1px);
         }
 
         .pixel-btn-danger {
-            background: linear-gradient(to bottom, #e54d4d, #991b1b);
-            border: 3px solid #450a0a;
+            background: linear-gradient(to bottom, rgba(239, 68, 68, 0.8), rgba(220, 38, 38, 0.8));
+            border: 1px solid rgba(252, 165, 165, 0.4);
             color: #ffffff;
-            box-shadow: inset 1px 1px 0px #fca5a5, inset -1px -1px 0px #7f1d1d;
+            border-radius: 6px;
         }
 
         /* Scrollbar styling */
         ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
+            width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: #11141c;
+            background: rgba(15, 23, 42, 0.4);
         }
         ::-webkit-scrollbar-thumb {
-            background: #3c4456;
-            border-radius: 2px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #f3c653;
+            background: rgba(56, 189, 248, 0.5);
+            border-radius: 3px;
         }
 
         /* Active Tab Highlight */
         .tab-active {
-            color: #f3c653 !important;
-            border-top: 4px solid #f3c653;
-            background: rgba(243, 198, 83, 0.1);
+            color: #fbbf24 !important;
+            border-top: 3px solid #fbbf24;
+            background: rgba(251, 191, 36, 0.15);
         }
     </style>
 </head>
 <body class="pb-24 pt-4 px-3 min-h-screen">
 
     <!-- Top Navigation Header -->
-    <header class="max-w-md mx-auto mb-4 pixel-box p-3 flex justify-between items-center bg-gray-900/90 backdrop-blur">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-amber-500/20 border-2 border-amber-400 flex items-center justify-center rounded">
-                <i class="fa-solid font-bold text-amber-400 text-lg">🗡️</i>
+    <header class="max-w-md mx-auto mb-4 pixel-box p-3 flex justify-between items-center bg-slate-900/25 backdrop-blur-md">
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('members')">
+            <div class="w-10 h-10 bg-sky-500/20 border border-sky-300/40 flex items-center justify-center rounded">
+                <i class="fa-solid font-bold text-sky-300 text-lg">❄️</i>
             </div>
             <div>
-                <h1 class="pixel-font text-amber-400 text-sm tracking-wide">自由的感覺</h1>
-                <p class="text-xs text-gray-400">北海道冒險旅程 2026</p>
+                <h1 class="pixel-font text-sky-200 text-sm tracking-wide">Hokkaido</h1>
+                <p class="text-[10px] text-amber-300/90 font-semibold">隊伍：自由的感覺 <i class="fa-solid fa-chevron-right text-[8px]"></i></p>
             </div>
         </div>
         <div class="flex gap-1">
-            <label for="bg-upload-input" class="pixel-btn text-xs px-2 py-1 flex items-center gap-1 text-amber-300 cursor-pointer">
+            <button onclick="switchTab('members')" class="pixel-btn text-xs px-2.5 py-1 flex items-center gap-1 text-amber-300">
+                <i class="fa-solid fa-users"></i>
+                <span>隊員</span>
+            </button>
+            <label for="bg-upload-input" class="pixel-btn text-xs px-2.5 py-1 flex items-center gap-1 text-sky-200 cursor-pointer">
                 <i class="fa-solid fa-image"></i>
                 <span>背景</span>
             </label>
@@ -192,54 +197,54 @@
         <!-- ================= PAGE 2: BOOKINGS (預訂) ================= -->
         <section id="tab-bookings" class="tab-content hidden space-y-4">
             <!-- Flights Section (Boarding Pass View) -->
-            <div class="pixel-box p-4 bg-slate-900/90">
+            <div class="pixel-box p-4 bg-slate-900/25">
                 <h3 class="pixel-font text-amber-400 text-xs mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-plane"></i> 航班資訊 (BOARDING PASS)
                 </h3>
                 
                 <!-- Departure Flight -->
-                <div class="border-2 border-dashed border-gray-600 p-3 rounded mb-3 bg-slate-800/60">
-                    <div class="flex justify-between items-center border-b border-gray-700 pb-2 mb-2">
+                <div class="border border-dashed border-sky-300/30 p-3 rounded mb-3 bg-slate-950/20">
+                    <div class="flex justify-between items-center border-b border-gray-700/50 pb-2 mb-2">
                         <span class="text-xs font-bold text-amber-300">去程 • tigersmart IT234</span>
-                        <span class="text-[10px] bg-emerald-900 text-emerald-300 px-2 py-0.5 rounded">T1 航廈</span>
+                        <span class="text-[10px] bg-emerald-900/60 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded">T1 航廈</span>
                     </div>
                     <div class="flex justify-between items-center text-center">
                         <div>
                             <div class="pixel-font text-lg text-white">TPE</div>
-                            <div class="text-[10px] text-gray-400">06:15 AM</div>
+                            <div class="text-[10px] text-gray-300">06:15 AM</div>
                             <div class="text-[10px] text-amber-200/70">2026-11-08</div>
                         </div>
-                        <div class="text-gray-500 text-xs">
+                        <div class="text-sky-300/60 text-xs">
                             <i class="fa-solid fa-plane"></i>
                             <div class="text-[9px]">約 3h 40m</div>
                         </div>
                         <div>
                             <div class="pixel-font text-lg text-white">CTS</div>
-                            <div class="text-[10px] text-gray-400">10:55 AM</div>
+                            <div class="text-[10px] text-gray-300">10:55 AM</div>
                             <div class="text-[10px] text-amber-200/70">新千歲機場</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Return Flight -->
-                <div class="border-2 border-dashed border-gray-600 p-3 rounded bg-slate-800/60">
-                    <div class="flex justify-between items-center border-b border-gray-700 pb-2 mb-2">
+                <div class="border border-dashed border-sky-300/30 p-3 rounded bg-slate-950/20">
+                    <div class="flex justify-between items-center border-b border-gray-700/50 pb-2 mb-2">
                         <span class="text-xs font-bold text-amber-300">回程 • tigersmart IT235</span>
-                        <span class="text-[10px] bg-emerald-900 text-emerald-300 px-2 py-0.5 rounded">T1 航廈</span>
+                        <span class="text-[10px] bg-emerald-900/60 text-emerald-300 border border-emerald-500/30 px-2 py-0.5 rounded">T1 航廈</span>
                     </div>
                     <div class="flex justify-between items-center text-center">
                         <div>
                             <div class="pixel-font text-lg text-white">CTS</div>
-                            <div class="text-[10px] text-gray-400">11:55 AM</div>
+                            <div class="text-[10px] text-gray-300">11:55 AM</div>
                             <div class="text-[10px] text-amber-200/70">2026-11-12</div>
                         </div>
-                        <div class="text-gray-500 text-xs">
+                        <div class="text-sky-300/60 text-xs">
                             <i class="fa-solid fa-plane rotate-180"></i>
                             <div class="text-[9px]">約 4h 40m</div>
                         </div>
                         <div>
                             <div class="pixel-font text-lg text-white">TPE</div>
-                            <div class="text-[10px] text-gray-400">15:35 PM</div>
+                            <div class="text-[10px] text-gray-300">15:35 PM</div>
                             <div class="text-[10px] text-amber-200/70">桃園 T1</div>
                         </div>
                     </div>
@@ -247,18 +252,18 @@
             </div>
 
             <!-- Hotel Booking Section -->
-            <div class="pixel-box p-4 bg-slate-900/90">
+            <div class="pixel-box p-4 bg-slate-900/25">
                 <h3 class="pixel-font text-amber-400 text-xs mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-hotel"></i> 住宿資訊 (11/08 - 11/12 4晚)
                 </h3>
                 <div class="space-y-2 text-xs">
                     <div class="font-bold text-sm text-white">Mitsui Garden Hotel Sapporo West</div>
-                    <p class="text-gray-300"><i class="fa-solid fa-location-dot text-rose-400 mr-1"></i> 北海道札幌市中央區北5条西6-2-4</p>
-                    <div class="grid grid-cols-2 gap-2 bg-black/40 p-2 rounded text-gray-300 mt-2">
+                    <p class="text-gray-200"><i class="fa-solid fa-location-dot text-rose-400 mr-1"></i> 北海道札幌市中央區北5条西6-2-4</p>
+                    <div class="grid grid-cols-2 gap-2 bg-black/20 p-2 rounded text-gray-300 mt-2 border border-white/10">
                         <div>Check-in: <span class="text-amber-300">15:00 後</span></div>
                         <div>Check-out: <span class="text-amber-300">11:00 前</span></div>
                     </div>
-                    <div class="pt-2 flex justify-between items-center text-gray-400">
+                    <div class="pt-2 flex justify-between items-center text-gray-300">
                         <span>預計入住隊員: Henry, Ginny</span>
                         <a href="https://maps.google.com/?q=Mitsui+Garden+Hotel+Sapporo+West" target="_blank" class="pixel-btn text-[10px] px-2 py-1 text-amber-300">
                             導航地圖 <i class="fa-solid fa-location-arrow"></i>
@@ -268,7 +273,7 @@
             </div>
 
             <!-- Protected Vouchers Section (PIN required) -->
-            <div class="pixel-box p-4 bg-slate-900/90">
+            <div class="pixel-box p-4 bg-slate-900/60">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="pixel-font text-amber-400 text-xs flex items-center gap-2">
                         <i class="fa-solid fa-lock"></i> 憑證/票券寶箱 (PIN 碼保護)
@@ -435,29 +440,36 @@
 
         <!-- ================= PAGE 5: LISTS (清單) ================= -->
         <section id="tab-lists" class="tab-content hidden space-y-4">
-            <div class="pixel-box p-3 bg-slate-900/90">
+            <div class="pixel-box p-3 bg-slate-900/25">
                 <div class="flex justify-between items-center mb-3">
-                    <h3 class="pixel-font text-amber-400 text-xs flex items-center gap-2">
-                        <i class="fa-solid fa-list-check"></i> 冒險任務與行前準備清單
-                    </h3>
+                    <div>
+                        <h3 class="pixel-font text-amber-400 text-xs flex items-center gap-2">
+                            <i class="fa-solid fa-list-check"></i> 冒險任務與準備清單
+                        </h3>
+                        <p class="text-[10px] text-amber-300 mt-0.5 cursor-pointer" onclick="switchTab('members')">隊伍名稱: 自由的感覺 (點擊查看成員名單 ➔)</p>
+                    </div>
                 </div>
 
                 <!-- Add Task Form -->
                 <div class="flex gap-1 mb-3">
-                    <input type="text" id="new-todo-text" placeholder="新增準備項目 (如 護照/網卡)..." class="bg-black border border-gray-700 p-1.5 rounded text-xs w-full text-white">
-                    <select id="new-todo-assignee" class="bg-black border border-gray-700 text-xs text-amber-300 rounded px-1">
+                    <input type="text" id="new-todo-text" placeholder="新增準備項目 (如 護照/網卡)..." class="bg-black/50 border border-sky-300/30 p-1.5 rounded text-xs w-full text-white placeholder-gray-400">
+                    <select id="new-todo-assignee" class="bg-black/50 border border-sky-300/30 text-xs text-amber-300 rounded px-1">
                         <option value="全體">全體</option>
-                        <option value="Henry">Henry</option>
-                        <option value="Ginny">Ginny</option>
+                        <option value="Henry">Henry (攻擊手)</option>
+                        <option value="Ginny">Ginny (魔法師)</option>
+                        <option value="Ciao">Ciao (補師)</option>
+                        <option value="Rain">Rain (小丑)</option>
                     </select>
                     <button onclick="addTodoItem()" class="pixel-btn-gold px-3 py-1 text-xs font-bold">新增</button>
                 </div>
 
                 <!-- Todo Filter Pills -->
-                <div class="flex gap-1 text-[11px] mb-2">
+                <div class="flex gap-1 text-[11px] mb-2 overflow-x-auto pb-1">
                     <button onclick="renderTodos('all')" class="pixel-btn px-2 py-0.5 text-amber-300">全部</button>
-                    <button onclick="renderTodos('Henry')" class="pixel-btn px-2 py-0.5 text-gray-300">Henry</button>
-                    <button onclick="renderTodos('Ginny')" class="pixel-btn px-2 py-0.5 text-gray-300">Ginny</button>
+                    <button onclick="renderTodos('Henry')" class="pixel-btn px-2 py-0.5 text-gray-200">Henry</button>
+                    <button onclick="renderTodos('Ginny')" class="pixel-btn px-2 py-0.5 text-gray-200">Ginny</button>
+                    <button onclick="renderTodos('Ciao')" class="pixel-btn px-2 py-0.5 text-gray-200">Ciao</button>
+                    <button onclick="renderTodos('Rain')" class="pixel-btn px-2 py-0.5 text-gray-200">Rain</button>
                 </div>
 
                 <!-- List Items -->
@@ -509,52 +521,55 @@
 
         <!-- ================= PAGE 7: MEMBERS (成員) ================= -->
         <section id="tab-members" class="tab-content hidden space-y-4">
-            <div class="pixel-box p-3 bg-slate-900/90">
-                <h3 class="pixel-font text-amber-400 text-xs mb-3 flex items-center gap-2">
-                    <i class="fa-solid fa-users-rays"></i> 「自由的感覺」小隊成員 (4人)
-                </h3>
+            <div class="pixel-box p-3 bg-slate-900/30">
+                <div class="border-b border-gray-700/40 pb-2 mb-3">
+                    <h3 class="pixel-font text-amber-400 text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-users-rays"></i> 小隊成員資料
+                    </h3>
+                    <p class="text-[11px] text-sky-200 mt-1">隊伍名稱：<span class="font-bold text-amber-300">自由的感覺</span></p>
+                </div>
                 
                 <div class="grid grid-cols-1 gap-3">
                     <!-- Member 1: Henry -->
-                    <div class="flex items-center space-x-3 bg-black/50 p-2.5 rounded border border-amber-500/30">
-                        <div class="w-12 h-12 bg-red-900/60 border-2 border-red-500 rounded flex items-center justify-center text-xl">
+                    <div class="flex items-center space-x-3 bg-black/25 p-2.5 rounded border border-red-500/40">
+                        <div class="w-12 h-12 bg-red-900/40 border border-red-400 rounded flex items-center justify-center text-xl">
                             ⚔️
                         </div>
                         <div>
                             <div class="font-bold text-sm text-amber-300">Henry <span class="text-xs text-red-400 ml-1">(攻擊手 • 本次參隊)</span></div>
-                            <div class="text-xs text-gray-400">主力輸出 / 路線規劃 / 烤肉擔當</div>
+                            <div class="text-xs text-gray-200">主力輸出 / 路線規劃 / 烤肉擔當</div>
                         </div>
                     </div>
 
                     <!-- Member 2: Ginny -->
-                    <div class="flex items-center space-x-3 bg-black/50 p-2.5 rounded border border-purple-500/30">
-                        <div class="w-12 h-12 bg-purple-900/60 border-2 border-purple-500 rounded flex items-center justify-center text-xl">
+                    <div class="flex items-center space-x-3 bg-black/25 p-2.5 rounded border border-purple-500/40">
+                        <div class="w-12 h-12 bg-purple-900/40 border border-purple-400 rounded flex items-center justify-center text-xl">
                             🧙‍♀️
                         </div>
                         <div>
                             <div class="font-bold text-sm text-purple-300">Ginny <span class="text-xs text-purple-400 ml-1">(魔法師 • 本次參隊)</span></div>
-                            <div class="text-xs text-gray-400">購物魔法 / 美食甜點搜尋 / 記帳大師</div>
+                            <div class="text-xs text-gray-200">購物魔法 / 美食甜點搜尋 / 記帳大師</div>
                         </div>
                     </div>
 
                     <!-- Member 3: Ciao -->
-                    <div class="flex items-center space-x-3 bg-black/50 p-2.5 rounded border border-gray-600 opacity-60">
-                        <div class="w-12 h-12 bg-emerald-900/60 border-2 border-emerald-500 rounded flex items-center justify-center text-xl">
+                    <div class="flex items-center space-x-3 bg-black/20 p-2.5 rounded border border-gray-600/30 opacity-75">
+                        <div class="w-12 h-12 bg-emerald-900/30 border border-emerald-500/30 rounded flex items-center justify-center text-xl">
                             🧪
                         </div>
                         <div>
-                            <div class="font-bold text-sm text-gray-300">Ciao <span class="text-xs text-gray-500 ml-1">(補師 • 未參與這次冒險)</span></div>
+                            <div class="font-bold text-sm text-gray-300">Ciao <span class="text-xs text-gray-400 ml-1">(補師 • 未參與這次冒險)</span></div>
                             <div class="text-xs text-gray-400">後勤補給 / 留守基地</div>
                         </div>
                     </div>
 
                     <!-- Member 4: Rain -->
-                    <div class="flex items-center space-x-3 bg-black/50 p-2.5 rounded border border-gray-600 opacity-60">
-                        <div class="w-12 h-12 bg-yellow-900/60 border-2 border-yellow-500 rounded flex items-center justify-center text-xl">
+                    <div class="flex items-center space-x-3 bg-black/20 p-2.5 rounded border border-gray-600/30 opacity-75">
+                        <div class="w-12 h-12 bg-yellow-900/30 border border-yellow-500/30 rounded flex items-center justify-center text-xl">
                             🤡
                         </div>
                         <div>
-                            <div class="font-bold text-sm text-gray-300">Rain <span class="text-xs text-gray-500 ml-1">(小丑 • 未參與這次冒險)</span></div>
+                            <div class="font-bold text-sm text-gray-300">Rain <span class="text-xs text-gray-400 ml-1">(小丑 • 未參與這次冒險)</span></div>
                             <div class="text-xs text-gray-400">氣氛製造 / 留守基地</div>
                         </div>
                     </div>
@@ -696,20 +711,18 @@
         function applySavedBackground() {
             const resetBtn = document.getElementById('reset-bg-btn');
             if(savedBgImage) {
-                document.body.style.backgroundImage = `linear-gradient(rgba(7, 9, 13, 0.75), rgba(7, 9, 13, 0.88)), url('${savedBgImage}')`;
+                document.body.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.65)), url('${savedBgImage}')`;
                 document.body.style.backgroundSize = 'cover';
-                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundPosition = 'center top';
                 document.body.style.backgroundAttachment = 'fixed';
                 if(resetBtn) resetBtn.classList.remove('hidden');
             } else {
                 document.body.style.backgroundImage = `
-                    linear-gradient(rgba(7, 9, 13, 0.72), rgba(7, 9, 13, 0.88)),
-                    url('./bg.jpg'),
-                    radial-gradient(circle at 20% 30%, rgba(46, 127, 166, 0.12) 0%, transparent 40%),
-                    radial-gradient(circle at 80% 70%, rgba(255, 119, 34, 0.08) 0%, transparent 40%),
-                    linear-gradient(to bottom, #07090d, #0d1117)`;
+                    linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.65)),
+                    url('./bg.png'),
+                    url('./bg.jpg')`;
                 document.body.style.backgroundSize = 'cover';
-                document.body.style.backgroundPosition = 'center';
+                document.body.style.backgroundPosition = 'center top';
                 document.body.style.backgroundAttachment = 'fixed';
                 if(resetBtn) resetBtn.classList.add('hidden');
             }
@@ -777,11 +790,11 @@
                 if(item.type === 'flight') { badgeColor = "bg-purple-900/60 text-purple-300 border-purple-500/40"; icon = "fa-plane"; }
 
                 const card = document.createElement('div');
-                card.className = "pixel-box p-3 bg-slate-900/90 text-xs space-y-1.5";
+                card.className = "pixel-box p-3 bg-slate-900/25 text-xs space-y-1.5";
                 card.innerHTML = `
                     <div class="flex justify-between items-start">
                         <span class="pixel-font text-amber-400 text-[11px]">${item.time}</span>
-                        ${item.transit ? `<span class="bg-emerald-950 text-emerald-300 border border-emerald-600 px-1.5 py-0.5 rounded text-[10px]">預計交通: ${item.transit} (${item.cost || '免費'})</span>` : ''}
+                        ${item.transit ? `<span class="bg-emerald-950/60 text-emerald-300 border border-emerald-600/40 px-1.5 py-0.5 rounded text-[10px]">預計交通: ${item.transit} (${item.cost || '免費'})</span>` : ''}
                     </div>
                     <div class="font-bold text-white text-sm flex items-center gap-1.5">
                         <span class="px-1.5 py-0.5 rounded border text-[10px] ${badgeColor}">
@@ -789,7 +802,7 @@
                         </span>
                         ${item.title}
                     </div>
-                    <p class="text-gray-300 text-[11px] leading-relaxed">${item.desc}</p>
+                    <p class="text-gray-200 text-[11px] leading-relaxed">${item.desc}</p>
                     ${item.map ? `
                         <div class="pt-1 text-right">
                             <a href="${item.map}" target="_blank" class="pixel-btn px-2 py-1 text-[10px] text-amber-300 inline-flex items-center gap-1">
