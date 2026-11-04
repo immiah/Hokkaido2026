@@ -13,6 +13,107 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Hokkaido">
 
+    <!-- Firebase SDK Modules -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Firebase Configuration & Initialization
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hokkaido-2026-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDummyKeyForFallback",
+            authDomain: "hokkaido-2026.firebaseapp.com",
+            projectId: "hokkaido-2026",
+            storageBucket: "hokkaido-2026.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abcdef"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Global Sync Setup
+        window.db = db;
+        window.appId = appId;
+
+        // Authenticate & Listen for Real-time Cloud Changes
+        async function initCloudSync() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) {
+                console.log("Auth fallback to local mode if offline.");
+            }
+
+            // Sync Expenses realtime
+            const expensesRef = collection(db, 'artifacts', appId, 'public', 'data', 'expenses');
+            onSnapshot(expensesRef, (snapshot) => {
+                const cloudExpenses = [];
+                snapshot.forEach(doc => cloudExpenses.push(doc.data()));
+                if(cloudExpenses.length > 0) {
+                    window.expenses = cloudExpenses.sort((a,b) => b.id - a.id);
+                    if(typeof renderExpenses === 'function') renderExpenses();
+                }
+            }, (err) => console.log("Expense sync error:", err));
+
+            // Sync Journals realtime
+            const journalsRef = collection(db, 'artifacts', appId, 'public', 'data', 'journals');
+            onSnapshot(journalsRef, (snapshot) => {
+                const cloudJournals = [];
+                snapshot.forEach(doc => cloudJournals.push(doc.data()));
+                if(cloudJournals.length > 0) {
+                    window.journals = cloudJournals.sort((a,b) => b.id - a.id);
+                    if(typeof renderJournals === 'function') renderJournals();
+                }
+            }, (err) => console.log("Journal sync error:", err));
+
+            // Sync Todos realtime
+            const todosRef = collection(db, 'artifacts', appId, 'public', 'data', 'todos');
+            onSnapshot(todosRef, (snapshot) => {
+                const cloudTodos = [];
+                snapshot.forEach(doc => cloudTodos.push(doc.data()));
+                if(cloudTodos.length > 0) {
+                    window.todos = cloudTodos;
+                    if(typeof renderTodos === 'function') renderTodos('all');
+                }
+            }, (err) => console.log("Todo sync error:", err));
+        }
+
+        window.saveExpenseCloud = async function(item) {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'expenses', String(item.id));
+                await setDoc(docRef, item);
+            } catch (e) {
+                console.error("Cloud save failed:", e);
+            }
+        };
+
+        window.saveJournalCloud = async function(post) {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'journals', String(post.id));
+                await setDoc(docRef, post);
+            } catch (e) {
+                console.error("Cloud save failed:", e);
+            }
+        };
+
+        window.saveTodoCloud = async function(todo) {
+            try {
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'todos', String(todo.id));
+                await setDoc(docRef, todo);
+            } catch (e) {
+                console.error("Cloud save failed:", e);
+            }
+        };
+
+        initCloudSync();
+    </script>
+
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -301,8 +402,8 @@
                 <!-- Hidden Voucher Content -->
                 <div id="voucher-content" class="hidden space-y-3 pt-2">
                     <div class="text-xs text-emerald-400 mb-2">✓ 寶箱已解鎖！以下為上傳的票券憑證：</div>
-                    <div id="voucher-list" class="space-y-2">
-                        <!-- Voucher Items -->
+                    <div id="voucher-list" class="space-y-3">
+                        <!-- Voucher Items with inline photo preview -->
                     </div>
                     
                     <div class="border-t border-gray-700 pt-3">
@@ -694,7 +795,20 @@
         };
 
         // Initialize LocalStorage arrays
-        let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || [];
+        let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || [
+            {
+                id: 1700000000000,
+                title: "飯店費用",
+                curr: "TWD",
+                originalAmount: 11191,
+                jpy: Math.round(11191 / 0.215),
+                twd: 11191,
+                category: "其他",
+                payer: "Ginny",
+                photo: null,
+                date: "2026/11/08"
+            }
+        ];
         let journals = JSON.parse(localStorage.getItem('hkd_journals')) || [];
         let todos = JSON.parse(localStorage.getItem('hkd_todos')) || [
             { id: 1, text: "護照 (確認6個月以上有效期)", assignee: "全體", done: true },
@@ -867,21 +981,21 @@
             const container = document.getElementById('voucher-list');
             container.innerHTML = '';
             if(vouchers.length === 0) {
-                container.innerHTML = `<div class="text-gray-500 text-xs">目前尚無上傳的憑證。</div>`;
+                container.innerHTML = `<div class="text-gray-400 text-xs">目前尚無上傳的憑證。</div>`;
                 return;
             }
             vouchers.forEach((v, index) => {
                 const item = document.createElement('div');
-                item.className = "bg-black/60 p-2 rounded border border-gray-700 flex justify-between items-center text-xs";
+                item.className = "bg-black/60 p-3 rounded border border-gray-700 text-xs space-y-2";
                 item.innerHTML = `
-                    <div>
-                        <span class="font-bold text-amber-300">${v.title}</span>
-                        <span class="text-[10px] text-gray-500 block">${v.date}</span>
+                    <div class="flex justify-between items-center border-b border-gray-700 pb-1.5">
+                        <div>
+                            <span class="font-bold text-amber-300 text-sm">${v.title}</span>
+                            <span class="text-[10px] text-gray-400 block">${v.date}</span>
+                        </div>
+                        <button onclick="deleteVoucher(${index})" class="text-red-400 hover:text-red-300 text-[11px]"><i class="fa-solid fa-trash mr-1"></i>刪除</button>
                     </div>
-                    <div class="flex gap-2">
-                        <button onclick="viewImage('${v.image}')" class="text-sky-400 hover:underline">查看</button>
-                        <button onclick="deleteVoucher(${index})" class="text-red-400 hover:underline">刪除</button>
-                    </div>
+                    ${v.image ? `<img src="${v.image}" class="w-full rounded border border-gray-700 object-cover max-h-52 mt-1" onclick="viewImage('${v.image}')">` : ''}
                 `;
                 container.appendChild(item);
             });
@@ -985,6 +1099,9 @@
                 expenses.unshift(item);
                 localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
                 
+                // Cloud Sync Push
+                if(window.saveExpenseCloud) window.saveExpenseCloud(item);
+
                 document.getElementById('expense-title').value = '';
                 document.getElementById('expense-amount').value = '';
                 document.getElementById('calc-expression').value = '';
@@ -1101,6 +1218,9 @@
                 journals.unshift(post);
                 localStorage.setItem('hkd_journals', JSON.stringify(journals));
 
+                // Cloud Sync Push
+                if(window.saveJournalCloud) window.saveJournalCloud(post);
+
                 document.getElementById('journal-title').value = '';
                 document.getElementById('journal-text').value = '';
                 document.getElementById('journal-image').value = '';
@@ -1154,8 +1274,13 @@
             const assignee = document.getElementById('new-todo-assignee').value;
             if(!text) return;
 
-            todos.push({ id: Date.now(), text, assignee, done: false });
+            const newTodo = { id: Date.now(), text, assignee, done: false };
+            todos.push(newTodo);
             localStorage.setItem('hkd_todos', JSON.stringify(todos));
+            
+            // Cloud Sync Push
+            if(window.saveTodoCloud) window.saveTodoCloud(newTodo);
+
             document.getElementById('new-todo-text').value = '';
             renderTodos('all');
         }
@@ -1165,6 +1290,7 @@
             if(item) {
                 item.done = !item.done;
                 localStorage.setItem('hkd_todos', JSON.stringify(todos));
+                if(window.saveTodoCloud) window.saveTodoCloud(item);
                 renderTodos('all');
             }
         }
