@@ -5,10 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hokkaido - 自由的感覺 (Minecraft Dungeons Style)</title>
 
-    <!-- Web App & iOS/Android Icon Settings -->
-    <link rel="apple-touch-icon" sizes="180x180" href="./icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="./icon.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="./icon.png">
+    <!-- Web App & iOS/Android Icon Settings (強化 iPhone Safari 讀取與版本快取) -->
+    <link rel="apple-touch-icon" href="./icon.png?v=3">
+    <link rel="apple-touch-icon-precomposed" href="./icon.png?v=3">
+    <link rel="icon" type="image/png" sizes="192x192" href="./icon.png?v=3">
+    <link rel="shortcut icon" href="./icon.png?v=3">
+    
+    <!-- Open Graph Sharing Icon (社群/通訊軟體預覽圖) -->
+    <meta property="og:image" content="./icon.png?v=3">
+    <meta property="og:title" content="Hokkaido - 自由的感覺">
+    <meta property="og:description" content="北海道 2026 旅遊冒險指南">
+
+    <!-- Mobile Web App Metas -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Hokkaido">
@@ -154,7 +162,7 @@
             background-color: rgba(15, 23, 42, 0.25);
             backdrop-filter: blur(6px);
             -webkit-backdrop-filter: blur(6px);
-            border: 1.5 solid rgba(186, 230, 253, 0.25);
+            border: 1.5px solid rgba(186, 230, 253, 0.25);
             box-shadow: 
                 inset 1px 1px 0px rgba(255, 255, 255, 0.1),
                 0 4px 15px rgba(0, 0, 0, 0.25);
