@@ -5,16 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hokkaido - 自由的感覺 (Minecraft Dungeons Style)</title>
 
-    <!-- 1. Apple Touch Icon (最乾淨的標準絕對路徑，不加 ?v= 參數以防止 iOS 解析失敗) -->
-    <link rel="apple-touch-icon" href="https://immiah.github.io/Hokkaido2026/icon.png">
+    <!-- 1. Apple Touch Icon (加入 precomposed 避免 iOS 對 1254x1254 透明背景渲染成全白) -->
+    <link rel="apple-touch-icon-precomposed" sizes="180x180" href="https://immiah.github.io/Hokkaido2026/icon.png">
     <link rel="apple-touch-icon-precomposed" href="https://immiah.github.io/Hokkaido2026/icon.png">
+    <link rel="apple-touch-icon" href="https://immiah.github.io/Hokkaido2026/icon.png">
 
-    <!-- 2. 標準 Favicon -->
+    <!-- 2. 標準 Favicon (適應各種螢幕) -->
+    <link rel="icon" type="image/png" sizes="512x512" href="https://immiah.github.io/Hokkaido2026/icon.png">
     <link rel="icon" type="image/png" sizes="192x192" href="https://immiah.github.io/Hokkaido2026/icon.png">
     <link rel="shortcut icon" href="https://immiah.github.io/Hokkaido2026/icon.png">
     
-    <!-- 3. Web App Manifest (內嵌 Data URI：強迫 iOS/Android 自動識別為桌面 App) -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Hokkaido","short_name":"Hokkaido","start_url":"https://immiah.github.io/Hokkaido2026/","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://immiah.github.io/Hokkaido2026/icon.png","sizes":"192x192","type":"image/png"}]}'>
+    <!-- 3. Web App Manifest (內嵌 Data URI：設定 icons 大小包含 512x512 與 1024x1024) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Hokkaido","short_name":"Hokkaido","start_url":"https://immiah.github.io/Hokkaido2026/","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://immiah.github.io/Hokkaido2026/icon.png","sizes":"1254x1254 512x512 192x192","type":"image/png"}]}'>
 
     <!-- 4. Open Graph Sharing Icon (通訊軟體預覽圖) -->
     <meta property="og:image" content="https://immiah.github.io/Hokkaido2026/icon.png">
