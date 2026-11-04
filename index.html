@@ -23,107 +23,6 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Hokkaido">
 
-    <!-- Firebase SDK Modules -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot, collection } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase Configuration & Initialization
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hokkaido-2026-app';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "AIzaSyDummyKeyForFallback",
-            authDomain: "hokkaido-2026.firebaseapp.com",
-            projectId: "hokkaido-2026",
-            storageBucket: "hokkaido-2026.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:abcdef"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Global Sync Setup
-        window.db = db;
-        window.appId = appId;
-
-        // Authenticate & Listen for Real-time Cloud Changes
-        async function initCloudSync() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (e) {
-                console.log("Auth fallback to local mode if offline.");
-            }
-
-            // Sync Expenses realtime
-            const expensesRef = collection(db, 'artifacts', appId, 'public', 'data', 'expenses');
-            onSnapshot(expensesRef, (snapshot) => {
-                const cloudExpenses = [];
-                snapshot.forEach(doc => cloudExpenses.push(doc.data()));
-                if(cloudExpenses.length > 0) {
-                    window.expenses = cloudExpenses.sort((a,b) => b.id - a.id);
-                    if(typeof renderExpenses === 'function') renderExpenses();
-                }
-            }, (err) => console.log("Expense sync error:", err));
-
-            // Sync Journals realtime
-            const journalsRef = collection(db, 'artifacts', appId, 'public', 'data', 'journals');
-            onSnapshot(journalsRef, (snapshot) => {
-                const cloudJournals = [];
-                snapshot.forEach(doc => cloudJournals.push(doc.data()));
-                if(cloudJournals.length > 0) {
-                    window.journals = cloudJournals.sort((a,b) => b.id - a.id);
-                    if(typeof renderJournals === 'function') renderJournals();
-                }
-            }, (err) => console.log("Journal sync error:", err));
-
-            // Sync Todos realtime
-            const todosRef = collection(db, 'artifacts', appId, 'public', 'data', 'todos');
-            onSnapshot(todosRef, (snapshot) => {
-                const cloudTodos = [];
-                snapshot.forEach(doc => cloudTodos.push(doc.data()));
-                if(cloudTodos.length > 0) {
-                    window.todos = cloudTodos;
-                    if(typeof renderTodos === 'function') renderTodos('all');
-                }
-            }, (err) => console.log("Todo sync error:", err));
-        }
-
-        window.saveExpenseCloud = async function(item) {
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'expenses', String(item.id));
-                await setDoc(docRef, item);
-            } catch (e) {
-                console.error("Cloud save failed:", e);
-            }
-        };
-
-        window.saveJournalCloud = async function(post) {
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'journals', String(post.id));
-                await setDoc(docRef, post);
-            } catch (e) {
-                console.error("Cloud save failed:", e);
-            }
-        };
-
-        window.saveTodoCloud = async function(todo) {
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'todos', String(todo.id));
-                await setDoc(docRef, todo);
-            } catch (e) {
-                console.error("Cloud save failed:", e);
-            }
-        };
-
-        initCloudSync();
-    </script>
-
     <!-- Tailwind CSS (CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -1108,9 +1007,6 @@
                 };
                 expenses.unshift(item);
                 localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
-                
-                // Cloud Sync Push
-                if(window.saveExpenseCloud) window.saveExpenseCloud(item);
 
                 document.getElementById('expense-title').value = '';
                 document.getElementById('expense-amount').value = '';
@@ -1228,9 +1124,6 @@
                 journals.unshift(post);
                 localStorage.setItem('hkd_journals', JSON.stringify(journals));
 
-                // Cloud Sync Push
-                if(window.saveJournalCloud) window.saveJournalCloud(post);
-
                 document.getElementById('journal-title').value = '';
                 document.getElementById('journal-text').value = '';
                 document.getElementById('journal-image').value = '';
@@ -1287,9 +1180,6 @@
             const newTodo = { id: Date.now(), text, assignee, done: false };
             todos.push(newTodo);
             localStorage.setItem('hkd_todos', JSON.stringify(todos));
-            
-            // Cloud Sync Push
-            if(window.saveTodoCloud) window.saveTodoCloud(newTodo);
 
             document.getElementById('new-todo-text').value = '';
             renderTodos('all');
@@ -1300,7 +1190,6 @@
             if(item) {
                 item.done = !item.done;
                 localStorage.setItem('hkd_todos', JSON.stringify(todos));
-                if(window.saveTodoCloud) window.saveTodoCloud(item);
                 renderTodos('all');
             }
         }
@@ -1422,3 +1311,11 @@
 </body>
 </html>
 ```
+
+### 💡 如果更新此程式碼後依然是白框，建議進行【圖片終極防護處置】：
+
+若 iOS Safari 因為這張圖片是 **PNG 透明背景** 依然強行擦除，您只需要：
+1. 用手機相簿或電腦的小畫家，將這張圖片**另存成 JPG 格式**（讓背景有底色，不帶 PNG 透明度）。
+2. 在 GitHub 上重命名上傳為 **`icon.png`**（覆蓋原本的檔案）。
+
+這樣 iOS 就能百分百順利擷取到色彩繽紛的桌面 Icon 囉！
