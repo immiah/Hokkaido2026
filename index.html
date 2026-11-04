@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hokkaido - 自由的感覺 (Minecraft Dungeons Style)</title>
 
-    <!-- 1. iOS Safari 標準 Apple Touch Icon (還原純粹網址，無問號參數) -->
-    <link rel="apple-touch-icon" href="https://immiah.github.io/Hokkaido2026/icon.png">
+    <!-- iOS 專用 Apple Touch Icon 語法（標準 + precomposed 雙重相容） -->
+    <link rel="apple-touch-icon" href="icon.png">
+    <link rel="apple-touch-icon-precomposed" href="icon.png">
 
-    <!-- 2. 標準 Favicon 宣告 -->
-    <link rel="icon" type="image/png" sizes="192x192" href="https://immiah.github.io/Hokkaido2026/icon.png">
-    <link rel="shortcut icon" href="https://immiah.github.io/Hokkaido2026/icon.png">
+    <!-- 一般 Favicon 宣告 -->
+    <link rel="icon" type="image/png" href="icon.png">
+    <link rel="shortcut icon" href="icon.png">
     
-    <!-- 3. Web App Manifest -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Hokkaido","short_name":"Hokkaido","start_url":"https://immiah.github.io/Hokkaido2026/","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"https://immiah.github.io/Hokkaido2026/icon.png","sizes":"192x192 512x512","type":"image/png"}]}'>
+    <!-- Web App Manifest (強制指定背景色避免白色渲染) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Hokkaido","short_name":"Hokkaido","start_url":"./","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","icons":[{"src":"icon.png","sizes":"192x192 512x512 1024x1024","type":"image/png","purpose":"any maskable"}]}'>
 
-    <!-- 4. Open Graph Sharing Icon -->
+    <!-- Open Graph Sharing Icon -->
     <meta property="og:image" content="https://immiah.github.io/Hokkaido2026/icon.png">
     <meta property="og:title" content="Hokkaido - 自由的感覺">
     <meta property="og:description" content="北海道 2026 旅遊冒險指南">
@@ -1423,3 +1424,12 @@
     </script>
 </body>
 </html>
+```
+
+### 💡 如果更新此程式碼後依然是白框，建議進行【圖片終極防護處置】：
+
+若 iOS Safari 因為這張圖片是 **PNG 透明背景** 依然強行擦除，您只需要：
+1. 用手機相簿或電腦的小畫家，將這張圖片**另存成 JPG 格式**（讓背景有底色，不帶 PNG 透明度）。
+2. 在 GitHub 上重命名上傳為 **`icon.png`**（覆蓋原本的檔案）。
+
+這樣 iOS 就能百分百順利擷取到色彩繽紛的桌面 Icon 囉！
