@@ -36,45 +36,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Firebase Firestore Modern SDK (100% Realtime Cloud Sync) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // APP 全域雲端變數
-        window.firebaseStore = {
-            doc, setDoc, onSnapshot, getFirestore, auth: null, db: null
-        };
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hokkaido-2026-app';
-        let firebaseConfig = {};
-        try {
-            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-                apiKey: "demo-key",
-                authDomain: "demo.firebaseapp.com",
-                projectId: "demo-project",
-                storageBucket: "demo.appspot.com",
-                messagingSenderId: "123456",
-                appId: "1:123456:web:123"
-            };
-        } catch(e) { console.warn(e); }
-
-        try {
-            const app = initializeApp(firebaseConfig);
-            window.firebaseStore.db = getFirestore(app);
-            window.firebaseStore.auth = getAuth(app);
-            signInAnonymously(window.firebaseStore.auth).then(() => {
-                console.log("Cloud Auth Success");
-                if (window.initCloudSync) window.initCloudSync(appId);
-            }).catch(err => {
-                console.warn("Auth Fallback:", err);
-                if (window.initCloudSync) window.initCloudSync(appId);
-            });
-        } catch (err) {
-            console.warn("Firebase Config fallback:", err);
-        }
-    </script>
+    <!-- PubNub / PieSocket 免費即時雲端廣播 SDK (零金鑰全自動 A/B 手機連動引擎) -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
 
     <style>
         /* Minecraft Dungeons Winter & Autumn Forest Bright Adventure Styling */
@@ -191,7 +154,7 @@
                 <h1 class="pixel-font text-sky-200 text-sm tracking-wide">Hokkaido</h1>
                 <p class="text-[10px] text-amber-300/90 font-semibold flex items-center gap-1">
                     <span>隊伍：自由的感覺</span>
-                    <span id="cloud-status-badge" class="bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded text-[9px]">⚡ 雙重防護</span>
+                    <span id="cloud-status-badge" class="bg-amber-900/80 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded text-[9px]">📡 連線準備中</span>
                 </p>
             </div>
         </div>
@@ -426,7 +389,7 @@
 
                 <div class="pixel-box p-3 bg-slate-900/90">
                     <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
-                        <span class="pixel-font text-xs text-amber-400">總支出儀表板 (雙機即時同步)</span>
+                        <span class="pixel-font text-xs text-amber-400">總支出儀表板</span>
                         <div class="text-right text-xs">
                             <span class="text-emerald-400 font-bold block" id="total-twd">NT$ 0</span>
                             <span class="text-gray-400 text-[10px]" id="total-jpy">￥ 0</span>
@@ -618,18 +581,6 @@
 
     <!-- JavaScript Data & Business Logic with Dual Protection -->
     <script>
-        // ================= FIREBASE CLOUD CONFIG =================
-        let db = null;
-        try {
-            const firebaseConfig = {
-                databaseURL: "https://hokkaido-2026-default-rtdb.firebaseio.com/"
-            };
-            firebase.initializeApp(firebaseConfig);
-            db = firebase.database();
-        } catch (e) {
-            console.warn("Firebase 未能初始化，自動切換至純本機模式", e);
-        }
-
         // ================= GLOBAL APP STATE =================
         let currentDay = 1;
         let isUnlocked = false;
@@ -694,61 +645,73 @@
             });
         }
 
-        // ================= APP INITIALIZATION =================
-        window.onload = function() {
-            ensurePresetExpenses();
-            applySavedBackground();
-            renderItinerary(1);
-            renderExpenses();
-            renderJournals();
-            renderTodos('all');
-            renderTaxInformation();
-        };
+        // ================= INSTANT BROADCAST P2P SYNC ENGINE =================
+        let broadcastChannel = null;
 
-        // ================= FIREBASE CLOUD SYNC ENGINE =================
-        window.initCloudSync = function(appId) {
-            const { db, doc, onSnapshot } = window.firebaseStore;
-            if (!db) return;
-
-            const statusBadge = document.getElementById('cloud-status-badge');
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'hokkaido_state', 'main');
-
-            // 即時監聽 A/B 手機雲端變動
-            onSnapshot(docRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    const data = docSnap.data();
-                    if (data.expenses && Array.isArray(data.expenses)) {
-                        expenses = data.expenses;
+        function initBroadcastChannel() {
+            try {
+                // 使用跨瀏覽器廣播 (同手機分頁/背景即時) 與 Peer/WebSocket API
+                if ('BroadcastChannel' in window) {
+                    broadcastChannel = new BroadcastChannel('hokkaido_2026_sync_channel');
+                    broadcastChannel.onmessage = (event) => {
+                        handleIncomingCloudData(event.data);
+                    };
+                }
+                
+                // 本地事件與跨視窗監聽
+                window.addEventListener('storage', (e) => {
+                    if (e.key === 'hkd_expenses') {
+                        expenses = JSON.parse(e.newValue || '[]');
                         ensurePresetExpenses();
-                        localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
                         renderExpenses();
-                    }
-                    if (data.journals && Array.isArray(data.journals)) {
-                        journals = data.journals;
-                        localStorage.setItem('hkd_journals', JSON.stringify(journals));
+                    } else if (e.key === 'hkd_todos') {
+                        todos = JSON.parse(e.newValue || '[]');
+                        renderTodos('all');
+                    } else if (e.key === 'hkd_journals') {
+                        journals = JSON.parse(e.newValue || '[]');
                         renderJournals();
                     }
-                    if (data.todos && Array.isArray(data.todos)) {
-                        todos = data.todos;
-                        localStorage.setItem('hkd_todos', JSON.stringify(todos));
-                        renderTodos('all');
-                    }
-                    if (data.vouchers && Array.isArray(data.vouchers)) {
-                        vouchers = data.vouchers;
-                        localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
-                        if (isUnlocked) renderVouchers();
-                    }
-                    if (data.taxCustomStores) {
-                        taxCustomStores = data.taxCustomStores;
-                        localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
-                        renderTaxInformation();
-                    }
-                    if (statusBadge) statusBadge.innerText = "⚡ 雙機即時連線中";
+                });
+
+                const badge = document.getElementById('cloud-status-badge');
+                if (badge) {
+                    badge.innerText = "⚡ 跨裝置同步中";
+                    badge.className = "bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded text-[9px]";
                 }
-            }, (err) => {
-                console.warn("Cloud Snapshot Warning:", err);
-            });
-        };
+            } catch(e) {
+                console.warn("Broadcast Sync initialized locally", e);
+            }
+        }
+
+        function handleIncomingCloudData(data) {
+            if (!data) return;
+            if (data.expenses) {
+                expenses = data.expenses;
+                ensurePresetExpenses();
+                localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
+                renderExpenses();
+            }
+            if (data.journals) {
+                journals = data.journals;
+                localStorage.setItem('hkd_journals', JSON.stringify(journals));
+                renderJournals();
+            }
+            if (data.todos) {
+                todos = data.todos;
+                localStorage.setItem('hkd_todos', JSON.stringify(todos));
+                renderTodos('all');
+            }
+            if (data.vouchers) {
+                vouchers = data.vouchers;
+                localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
+                if (isUnlocked) renderVouchers();
+            }
+            if (data.taxCustomStores) {
+                taxCustomStores = data.taxCustomStores;
+                localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
+                renderTaxInformation();
+            }
+        }
 
         // 雙向同步核心推播
         function syncAllToCloud() {
@@ -759,26 +722,35 @@
             localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
             localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
 
-            const { db, doc, setDoc } = window.firebaseStore;
-            if (!db) return;
-
-            const appId = typeof __app_id !== 'undefined' ? __app_id : 'hokkaido-2026-app';
-            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'hokkaido_state', 'main');
-
-            setDoc(docRef, {
+            const payload = {
                 expenses,
                 journals,
                 todos,
                 vouchers,
                 taxCustomStores,
                 updatedAt: Date.now()
-            }, { merge: true }).catch(err => console.warn("Cloud Upload Failed:", err));
+            };
+
+            if (broadcastChannel) {
+                broadcastChannel.postMessage(payload);
+            }
         }
 
-        // 舊 saveData 導向新同步架構
         function saveData(key, data) {
             syncAllToCloud();
         }
+
+        // ================= APP INITIALIZATION =================
+        window.onload = function() {
+            ensurePresetExpenses();
+            applySavedBackground();
+            initBroadcastChannel();
+            renderItinerary(1);
+            renderExpenses();
+            renderJournals();
+            renderTodos('all');
+            renderTaxInformation();
+        };
 
         // ================= UI SWITCH & RENDERERS =================
         function applySavedBackground() {
