@@ -36,9 +36,45 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- Firebase SDK (Compat Version for Realtime Database) -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+    <!-- Firebase Firestore Modern SDK (100% Realtime Cloud Sync) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // APP 全域雲端變數
+        window.firebaseStore = {
+            doc, setDoc, onSnapshot, getFirestore, auth: null, db: null
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hokkaido-2026-app';
+        let firebaseConfig = {};
+        try {
+            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                apiKey: "demo-key",
+                authDomain: "demo.firebaseapp.com",
+                projectId: "demo-project",
+                storageBucket: "demo.appspot.com",
+                messagingSenderId: "123456",
+                appId: "1:123456:web:123"
+            };
+        } catch(e) { console.warn(e); }
+
+        try {
+            const app = initializeApp(firebaseConfig);
+            window.firebaseStore.db = getFirestore(app);
+            window.firebaseStore.auth = getAuth(app);
+            signInAnonymously(window.firebaseStore.auth).then(() => {
+                console.log("Cloud Auth Success");
+                if (window.initCloudSync) window.initCloudSync(appId);
+            }).catch(err => {
+                console.warn("Auth Fallback:", err);
+                if (window.initCloudSync) window.initCloudSync(appId);
+            });
+        } catch (err) {
+            console.warn("Firebase Config fallback:", err);
+        }
+    </script>
 
     <style>
         /* Minecraft Dungeons Winter & Autumn Forest Bright Adventure Styling */
@@ -155,7 +191,7 @@
                 <h1 class="pixel-font text-sky-200 text-sm tracking-wide">Hokkaido</h1>
                 <p class="text-[10px] text-amber-300/90 font-semibold flex items-center gap-1">
                     <span>隊伍：自由的感覺</span>
-                    <span id="cloud-status-badge" class="bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded text-[9px]">⚡ 雲端連線</span>
+                    <span id="cloud-status-badge" class="bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded text-[9px]">⚡ 雙重防護</span>
                 </p>
             </div>
         </div>
@@ -580,14 +616,19 @@
         </div>
     </nav>
 
-    <!-- JavaScript Data & Business Logic with Firebase Sync -->
+    <!-- JavaScript Data & Business Logic with Dual Protection -->
     <script>
         // ================= FIREBASE CLOUD CONFIG =================
-        const firebaseConfig = {
-            databaseURL: "https://hokkaido-2026-default-rtdb.firebaseio.com/"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        let db = null;
+        try {
+            const firebaseConfig = {
+                databaseURL: "https://hokkaido-2026-default-rtdb.firebaseio.com/"
+            };
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        } catch (e) {
+            console.warn("Firebase 未能初始化，自動切換至純本機模式", e);
+        }
 
         // ================= GLOBAL APP STATE =================
         let currentDay = 1;
@@ -628,105 +669,134 @@
             "Global Blue": ["UNIQLO", "GU", "The North Face", "高島屋", "三越伊勢丹", "大丸"]
         };
 
-        // 預設花費：絕對永久保留
         const defaultPresetExpenses = [
             { id: 1700000000001, title: "機票來回 兩人", curr: "TWD", originalAmount: 30508, jpy: Math.round(30508 / 0.215), twd: 30508, category: "交通", payer: "Ginny", photo: null, date: "2026/11/08" },
             { id: 1700000000000, title: "飯店費用", curr: "TWD", originalAmount: 11191, jpy: Math.round(11191 / 0.215), twd: 11191, category: "其他", payer: "Ginny", photo: null, date: "2026/11/08" }
         ];
 
-        let expenses = [];
-        let journals = [];
-        let todos = [];
-        let vouchers = [];
-        let taxCustomStores = {};
+        // 載入本地存檔
+        let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || [...defaultPresetExpenses];
+        let journals = JSON.parse(localStorage.getItem('hkd_journals')) || [];
+        let todos = JSON.parse(localStorage.getItem('hkd_todos')) || [
+            { id: 1, text: "護照 (確認6個月以上有效期)", assignee: "全體", done: true },
+            { id: 2, text: "日本 eSIM / 實體網卡準備", assignee: "Henry", done: true },
+            { id: 3, text: "日幣現金與信用卡準備", assignee: "Ginny", done: false },
+            { id: 4, text: "預約 11/10 札幌蟹家晚餐", assignee: "Ginny", done: false }
+        ];
+        let vouchers = JSON.parse(localStorage.getItem('hkd_vouchers')) || [];
+        let taxCustomStores = JSON.parse(localStorage.getItem('hkd_tax_stores')) || {};
 
-        // ================= APP INITIALIZATION & FIREBASE SYNC =================
-        window.onload = function() {
-            try {
-                applySavedBackground();
-                renderItinerary(1);
-                renderTaxInformation();
-            } catch (err) {
-                console.warn(err);
-            }
-            initFirebaseListeners();
-        };
-
-        function initFirebaseListeners() {
-            const statusBadge = document.getElementById('cloud-status-badge');
-
-            // 1. 監聽記帳資料
-            db.ref('hokkaido_2026/expenses').on('value', (snapshot) => {
-                const val = snapshot.val();
-                if (val) {
-                    expenses = Array.isArray(val) ? val : Object.values(val);
-                } else {
-                    expenses = [...defaultPresetExpenses];
-                    db.ref('hokkaido_2026/expenses').set(expenses);
-                }
-                // 確保預設機票與飯店永遠存在
-                const hasFlight = expenses.some(e => e.id === 1700000000001);
-                const hasHotel = expenses.some(e => e.id === 1700000000000);
-                if (!hasFlight) expenses.unshift(defaultPresetExpenses[0]);
-                if (!hasHotel) expenses.unshift(defaultPresetExpenses[1]);
-
-                renderExpenses();
-                statusBadge.innerText = "⚡ 雲端連線";
-                statusBadge.className = "bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded text-[9px]";
-            }, (error) => {
-                statusBadge.innerText = "💾 離線備份";
-                statusBadge.className = "bg-amber-900/80 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded text-[9px]";
-                expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || defaultPresetExpenses;
-                renderExpenses();
-            });
-
-            // 2. 監聽日誌
-            db.ref('hokkaido_2026/journals').on('value', (snapshot) => {
-                const val = snapshot.val();
-                journals = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
-                renderJournals();
-            });
-
-            // 3. 監聽清單
-            db.ref('hokkaido_2026/todos').on('value', (snapshot) => {
-                const val = snapshot.val();
-                if (val) {
-                    todos = Array.isArray(val) ? val : Object.values(val);
-                } else {
-                    todos = [
-                        { id: 1, text: "護照 (確認6個月以上有效期)", assignee: "全體", done: true },
-                        { id: 2, text: "日本 eSIM / 實體網卡準備", assignee: "Henry", done: true },
-                        { id: 3, text: "日幣現金與信用卡準備", assignee: "Ginny", done: false },
-                        { id: 4, text: "預約 11/10 札幌蟹家晚餐", assignee: "Ginny", done: false }
-                    ];
-                    db.ref('hokkaido_2026/todos').set(todos);
-                }
-                renderTodos('all');
-            });
-
-            // 4. 監聽憑證
-            db.ref('hokkaido_2026/vouchers').on('value', (snapshot) => {
-                const val = snapshot.val();
-                vouchers = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
-                if(isUnlocked) renderVouchers();
-            });
-
-            // 5. 監聽自訂退稅商店
-            db.ref('hokkaido_2026/tax_stores').on('value', (snapshot) => {
-                const val = snapshot.val();
-                taxCustomStores = val || {};
-                renderTaxInformation();
+        // 檢查並保護預設費用 (機票與飯店)
+        function ensurePresetExpenses() {
+            defaultPresetExpenses.forEach(presetItem => {
+                const exists = expenses.some(e => e.id === presetItem.id || e.title === presetItem.title);
+                if (!exists) expenses.push(presetItem);
             });
         }
 
-        // Background Image Management
+        // ================= APP INITIALIZATION =================
+        window.onload = function() {
+            ensurePresetExpenses();
+            applySavedBackground();
+            renderItinerary(1);
+            renderExpenses();
+            renderJournals();
+            renderTodos('all');
+            renderTaxInformation();
+        };
+
+        // ================= FIREBASE CLOUD SYNC ENGINE =================
+        window.initCloudSync = function(appId) {
+            const { db, doc, onSnapshot } = window.firebaseStore;
+            if (!db) return;
+
+            const statusBadge = document.getElementById('cloud-status-badge');
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'hokkaido_state', 'main');
+
+            // 即時監聽 A/B 手機雲端變動
+            onSnapshot(docRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data.expenses && Array.isArray(data.expenses)) {
+                        expenses = data.expenses;
+                        ensurePresetExpenses();
+                        localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
+                        renderExpenses();
+                    }
+                    if (data.journals && Array.isArray(data.journals)) {
+                        journals = data.journals;
+                        localStorage.setItem('hkd_journals', JSON.stringify(journals));
+                        renderJournals();
+                    }
+                    if (data.todos && Array.isArray(data.todos)) {
+                        todos = data.todos;
+                        localStorage.setItem('hkd_todos', JSON.stringify(todos));
+                        renderTodos('all');
+                    }
+                    if (data.vouchers && Array.isArray(data.vouchers)) {
+                        vouchers = data.vouchers;
+                        localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
+                        if (isUnlocked) renderVouchers();
+                    }
+                    if (data.taxCustomStores) {
+                        taxCustomStores = data.taxCustomStores;
+                        localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
+                        renderTaxInformation();
+                    }
+                    if (statusBadge) statusBadge.innerText = "⚡ 雙機即時連線中";
+                }
+            }, (err) => {
+                console.warn("Cloud Snapshot Warning:", err);
+            });
+        };
+
+        // 雙向同步核心推播
+        function syncAllToCloud() {
+            ensurePresetExpenses();
+            localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
+            localStorage.setItem('hkd_journals', JSON.stringify(journals));
+            localStorage.setItem('hkd_todos', JSON.stringify(todos));
+            localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
+            localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
+
+            const { db, doc, setDoc } = window.firebaseStore;
+            if (!db) return;
+
+            const appId = typeof __app_id !== 'undefined' ? __app_id : 'hokkaido-2026-app';
+            const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'hokkaido_state', 'main');
+
+            setDoc(docRef, {
+                expenses,
+                journals,
+                todos,
+                vouchers,
+                taxCustomStores,
+                updatedAt: Date.now()
+            }, { merge: true }).catch(err => console.warn("Cloud Upload Failed:", err));
+        }
+
+        // 舊 saveData 導向新同步架構
+        function saveData(key, data) {
+            syncAllToCloud();
+        }
+
+        // ================= UI SWITCH & RENDERERS =================
         function applySavedBackground() {
             const resetBtn = document.getElementById('reset-bg-btn');
             if(savedBgImage) {
                 document.body.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.65)), url('${savedBgImage}')`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center top';
+                document.body.style.backgroundAttachment = 'fixed';
                 if(resetBtn) resetBtn.classList.remove('hidden');
             } else {
-                document.body.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.65)), url('./bg.png'), url('./bg.jpg')`;
+                document.body.style.backgroundImage = `
+                    linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.65)),
+                    url('./bg.png'),
+                    url('./bg.jpg')`;
+                document.body.style.backgroundSize = 'cover';
+                document.body.style.backgroundPosition = 'center top';
+                document.body.style.backgroundAttachment = 'fixed';
                 if(resetBtn) resetBtn.classList.add('hidden');
             }
         }
@@ -747,7 +817,6 @@
             applySavedBackground();
         }
 
-        // Navigation Controller
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
@@ -799,11 +868,19 @@
                         ${item.transit ? `<span class="bg-emerald-950/60 text-emerald-300 border border-emerald-600/40 px-1.5 py-0.5 rounded text-[10px]">預計交通: ${item.transit} (${item.cost || '免費'})</span>` : ''}
                     </div>
                     <div class="font-bold text-white text-sm flex items-center gap-1.5">
-                        <span class="px-1.5 py-0.5 rounded border text-[10px] ${badgeColor}"><i class="fa-solid ${icon}"></i></span>
+                        <span class="px-1.5 py-0.5 rounded border text-[10px] ${badgeColor}">
+                            <i class="fa-solid ${icon}"></i>
+                        </span>
                         ${item.title}
                     </div>
                     <p class="text-gray-200 text-[11px] leading-relaxed whitespace-pre-line">${item.desc}</p>
-                    ${item.map ? `<div class="pt-1 text-right"><a href="${item.map}" target="_blank" class="pixel-btn px-2 py-1 text-[10px] text-amber-300 inline-flex items-center gap-1"><i class="fa-solid fa-map-location-dot"></i> 開啟 Google Maps</a></div>` : ''}
+                    ${item.map ? `
+                        <div class="pt-1 text-right">
+                            <a href="${item.map}" target="_blank" class="pixel-btn px-2 py-1 text-[10px] text-amber-300 inline-flex items-center gap-1">
+                                <i class="fa-solid fa-map-location-dot"></i> 開啟 Google Maps
+                            </a>
+                        </div>
+                    ` : ''}
                 `;
                 container.appendChild(card);
             });
@@ -812,13 +889,15 @@
         function refreshWeatherSimulation() {
             const temps = ["6°C ~ 12°C (陽光普照)", "8°C ~ 14°C (晴時多雲)", "5°C ~ 10°C (微風有雨)"];
             const ropeways = ["🟢 正常營運中", "🟢 正常營運中 (班次密集)", "🟡 強風預警 (建議搭乘前再確認)"];
+            
             document.getElementById('sim-temp').innerText = temps[Math.floor(Math.random() * temps.length)];
             document.getElementById('sim-ropeway').innerText = ropeways[Math.floor(Math.random() * ropeways.length)];
         }
 
-        // ================= VOUCHERS / PIN UNLOCK =================
+        // ================= BOOKINGS & PIN UNLOCK =================
         function unlockVouchers() {
-            if(document.getElementById('pin-input').value === '2026') {
+            const pin = document.getElementById('pin-input').value;
+            if(pin === '2026') {
                 isUnlocked = true;
                 document.getElementById('pin-lock-screen').classList.add('hidden');
                 document.getElementById('voucher-content').classList.remove('hidden');
@@ -826,24 +905,29 @@
                 document.getElementById('pin-status-tag').className = "text-[10px] bg-emerald-900/80 text-emerald-200 px-2 py-0.5 rounded";
                 renderVouchers();
             } else {
-                alert("PIN 碼錯誤！(提示：2026)");
+                alert("PIN 碼錯誤！(提示：YEAR = 2026)");
             }
         }
 
         function uploadVoucher() {
             const fileInput = document.getElementById('voucher-file');
             const titleInput = document.getElementById('voucher-title');
-            if(!fileInput.files[0]) {
-                alert("請選擇照片");
-                return;
-            }
-            const defaultTitle = "憑證 " + new Date().toLocaleDateString();
-            compressAndBase64(fileInput.files[0], 800, 0.6, (base64) => {
-                vouchers.push({ title: titleInput.value.trim() || defaultTitle, image: base64, date: new Date().toLocaleDateString() });
-                db.ref('hokkaido_2026/vouchers').set(vouchers);
+            
+            const titleVal = titleInput.value.trim() || `憑證 ${new Date().toLocaleDateString()}`;
+
+            const processSave = (imgBase64 = null) => {
+                vouchers.push({ title: titleVal, image: imgBase64, date: new Date().toLocaleDateString() });
+                saveData('vouchers', vouchers);
+                renderVouchers();
                 titleInput.value = '';
                 fileInput.value = '';
-            });
+            };
+
+            if(fileInput.files[0]) {
+                compressAndBase64(fileInput.files[0], 800, 0.6, (base64) => processSave(base64));
+            } else {
+                processSave();
+            }
         }
 
         function renderVouchers() {
@@ -858,7 +942,10 @@
                 item.className = "bg-black/60 p-3 rounded border border-gray-700 text-xs space-y-2";
                 item.innerHTML = `
                     <div class="flex justify-between items-center border-b border-gray-700 pb-1.5">
-                        <div><span class="font-bold text-amber-300 text-sm">${v.title}</span><span class="text-[10px] text-gray-400 block">${v.date}</span></div>
+                        <div>
+                            <span class="font-bold text-amber-300 text-sm">${v.title}</span>
+                            <span class="text-[10px] text-gray-400 block">${v.date}</span>
+                        </div>
                         <button onclick="deleteVoucher(${index})" class="text-red-400 hover:text-red-300 text-[11px]"><i class="fa-solid fa-trash mr-1"></i>刪除</button>
                     </div>
                     ${v.image ? `<img src="${v.image}" class="w-full rounded border border-gray-700 object-cover max-h-52 mt-1" onclick="viewImage('${v.image}')">` : ''}
@@ -869,7 +956,8 @@
 
         function deleteVoucher(index) {
             vouchers.splice(index, 1);
-            db.ref('hokkaido_2026/vouchers').set(vouchers);
+            saveData('vouchers', vouchers);
+            renderVouchers();
         }
 
         // ================= WALLET & EXPENSE LOGIC =================
@@ -889,42 +977,64 @@
         }
 
         function evaluateExpression() {
+            const expr = document.getElementById('calc-expression').value;
             try {
-                const result = Function(`'use strict'; return (${document.getElementById('calc-expression').value})`)();
+                const result = Function(`'use strict'; return (${expr})`)();
                 if(!isNaN(result)) {
                     document.getElementById('expense-amount').value = Math.round(result);
+                    onCurrencyChange();
                     calculateCurrency();
                 }
-            } catch(e) { alert("算式格式錯誤"); }
+            } catch(e) {
+                alert("算式格式錯誤");
+            }
         }
 
-        function onCurrencyChange() { calculateCurrency(); }
+        function onCurrencyChange() {
+            calculateCurrency();
+        }
 
         function calculateCurrency() {
             const rate = parseFloat(document.getElementById('exchange-rate').value) || 0.215;
             const curr = document.getElementById('expense-currency').value;
             const amountInput = parseFloat(document.getElementById('expense-amount').value) || 0;
-            let valJpy = curr === 'JPY' ? amountInput : Math.round(amountInput / rate);
-            let valTwd = curr === 'TWD' ? amountInput : Math.round(valJpy * rate);
+
+            let valJpy = 0, valTwd = 0;
+            if(curr === 'JPY') {
+                valJpy = amountInput;
+                valTwd = Math.round(valJpy * rate);
+            } else {
+                valTwd = amountInput;
+                valJpy = Math.round(valTwd / rate);
+            }
+
             document.getElementById('calc-result-jpy').innerText = `￥ ${valJpy.toLocaleString()} (約 NT$ ${valTwd.toLocaleString()})`;
         }
 
         function addExpenseItem() {
-            const amount = parseFloat(document.getElementById('expense-amount').value);
-            if(isNaN(amount) || amount <= 0) {
-                alert("請填寫正確金額！");
-                return;
-            }
             const titleInput = document.getElementById('expense-title').value.trim();
-            const category = document.getElementById('expense-category').value;
-            const title = titleInput || (`未命名 ${category}`);
+            const amount = parseFloat(document.getElementById('expense-amount').value);
             const curr = document.getElementById('expense-currency').value;
+            const category = document.getElementById('expense-category').value;
             const payer = document.getElementById('expense-payer').value;
             const rate = parseFloat(document.getElementById('exchange-rate').value) || 0.215;
             const photoInput = document.getElementById('expense-photo');
 
-            let jpy = curr === 'JPY' ? amount : Math.round(amount / rate);
-            let twd = curr === 'TWD' ? amount : Math.round(jpy * rate);
+            if(isNaN(amount) || amount <= 0) {
+                alert("請輸入有效的金額！");
+                return;
+            }
+
+            const title = titleInput !== "" ? titleInput : "未命名花費";
+
+            let jpy = 0, twd = 0;
+            if(curr === 'JPY') {
+                jpy = amount;
+                twd = Math.round(jpy * rate);
+            } else {
+                twd = amount;
+                jpy = Math.round(twd / rate);
+            }
 
             const saveItem = (photoBase64 = null) => {
                 const item = {
@@ -940,7 +1050,8 @@
                     date: new Date().toLocaleDateString()
                 };
                 expenses.unshift(item);
-                db.ref('hokkaido_2026/expenses').set(expenses);
+                saveData('expenses', expenses);
+                renderExpenses();
 
                 document.getElementById('expense-title').value = '';
                 document.getElementById('expense-amount').value = '';
@@ -958,7 +1069,9 @@
         function renderExpenses() {
             const container = document.getElementById('expense-history-list');
             container.innerHTML = '';
-            let totalJpy = 0, totalTwd = 0;
+
+            let totalJpy = 0;
+            let totalTwd = 0;
 
             expenses.forEach((item, index) => {
                 totalJpy += item.jpy;
@@ -972,7 +1085,9 @@
                             <span class="text-amber-400">[${item.category}]</span> ${item.title}
                             <span class="text-[9px] bg-slate-800 text-gray-300 px-1 rounded">${item.payer}付</span>
                         </div>
-                        <div class="text-[10px] text-gray-400">${item.date} • ${item.curr === 'JPY' ? `￥${item.originalAmount}` : `NT$${item.originalAmount}`}</div>
+                        <div class="text-[10px] text-gray-400">
+                            ${item.date} • ${item.curr === 'JPY' ? `￥${item.originalAmount}` : `NT$${item.originalAmount}`}
+                        </div>
                     </div>
                     <div class="text-right flex items-center gap-2">
                         <div>
@@ -992,12 +1107,14 @@
 
         function deleteExpense(index) {
             expenses.splice(index, 1);
-            db.ref('hokkaido_2026/expenses').set(expenses);
+            saveData('expenses', expenses);
+            renderExpenses();
         }
 
         function renderCategorySummary() {
             const container = document.getElementById('category-summary-list');
             container.innerHTML = '';
+
             const categories = ["餐飲", "交通", "購物", "門票", "其他"];
             const summary = {};
             categories.forEach(c => summary[c] = { twd: 0, jpy: 0, count: 0 });
@@ -1014,8 +1131,14 @@
                 const card = document.createElement('div');
                 card.className = "bg-black/60 p-3 rounded border border-gray-700 text-xs flex justify-between items-center";
                 card.innerHTML = `
-                    <div><span class="font-bold text-amber-300 text-sm">${cat}</span><span class="text-[10px] text-gray-400 block">${data.count} 筆消費紀錄</span></div>
-                    <div class="text-right"><div class="font-bold text-emerald-400 text-sm">NT$ ${data.twd.toLocaleString()}</div><div class="text-[10px] text-gray-400">￥ ${data.jpy.toLocaleString()}</div></div>
+                    <div>
+                        <span class="font-bold text-amber-300 text-sm">${cat}</span>
+                        <span class="text-[10px] text-gray-400 block">${data.count} 筆消費紀錄</span>
+                    </div>
+                    <div class="text-right">
+                        <div class="font-bold text-emerald-400 text-sm">NT$ ${data.twd.toLocaleString()}</div>
+                        <div class="text-[10px] text-gray-400">￥ ${data.jpy.toLocaleString()}</div>
+                    </div>
                 `;
                 container.appendChild(card);
             });
@@ -1024,22 +1147,24 @@
         // ================= JOURNAL LOGIC =================
         function addJournalPost() {
             const titleInput = document.getElementById('journal-title').value.trim();
-            const text = document.getElementById('journal-text').value.trim();
+            const text = document.getElementById('journal-text').value;
             const author = document.getElementById('journal-author').value;
             const fileInput = document.getElementById('journal-image');
 
-            const title = titleInput || "北海道冒險日常";
+            const title = titleInput !== "" ? titleInput : `冒險紀錄 - ${new Date().toLocaleDateString()}`;
+
             const savePost = (imgBase64 = null) => {
                 const post = {
                     id: Date.now(),
                     title,
-                    text: text || "這是一刻值得留念的北海道回憶 ✨",
+                    text,
                     author,
                     image: imgBase64,
                     time: new Date().toLocaleString('zh-TW', { hour12: false })
                 };
                 journals.unshift(post);
-                db.ref('hokkaido_2026/journals').set(journals);
+                saveData('journals', journals);
+                renderJournals();
 
                 document.getElementById('journal-title').value = '';
                 document.getElementById('journal-text').value = '';
@@ -1056,19 +1181,26 @@
         function renderJournals() {
             const container = document.getElementById('journal-feed');
             container.innerHTML = '';
+
             if(journals.length === 0) {
                 container.innerHTML = `<div class="pixel-box p-4 text-center text-xs text-gray-400">尚未發表任何冒險動態，快來分享第一張照片吧！</div>`;
                 return;
             }
+
             journals.forEach((post, index) => {
                 const card = document.createElement('div');
                 card.className = "pixel-box p-3 bg-slate-900/90 space-y-2 text-xs";
                 card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-gray-700 pb-1.5"><span class="font-bold text-amber-300">${post.author}</span><span class="text-[10px] text-gray-400">${post.time}</span></div>
+                    <div class="flex justify-between items-center border-b border-gray-700 pb-1.5">
+                        <span class="font-bold text-amber-300">${post.author}</span>
+                        <span class="text-[10px] text-gray-400">${post.time}</span>
+                    </div>
                     <div class="font-bold text-sm text-white">${post.title}</div>
                     <p class="text-gray-300 leading-relaxed">${post.text}</p>
                     ${post.image ? `<img src="${post.image}" class="w-full rounded border border-gray-700 object-cover max-h-60 mt-2">` : ''}
-                    <div class="text-right pt-1"><button onclick="deleteJournal(${index})" class="text-red-400 text-[10px] hover:underline">刪除日誌</button></div>
+                    <div class="text-right pt-1">
+                        <button onclick="deleteJournal(${index})" class="text-red-400 text-[10px] hover:underline">刪除日誌</button>
+                    </div>
                 `;
                 container.appendChild(card);
             });
@@ -1076,16 +1208,21 @@
 
         function deleteJournal(index) {
             journals.splice(index, 1);
-            db.ref('hokkaido_2026/journals').set(journals);
+            saveData('journals', journals);
+            renderJournals();
         }
 
         // ================= TODOS / LISTS LOGIC =================
         function addTodoItem() {
-            const text = document.getElementById('new-todo-text').value.trim();
+            const text = document.getElementById('new-todo-text').value;
             const assignee = document.getElementById('new-todo-assignee').value;
             if(!text) return;
-            todos.push({ id: Date.now(), text, assignee, done: false });
-            db.ref('hokkaido_2026/todos').set(todos);
+
+            const newTodo = { id: Date.now(), text, assignee, done: false };
+            todos.push(newTodo);
+            saveData('todos', todos);
+            renderTodos('all');
+
             document.getElementById('new-todo-text').value = '';
         }
 
@@ -1093,18 +1230,21 @@
             const item = todos.find(t => t.id === id);
             if(item) {
                 item.done = !item.done;
-                db.ref('hokkaido_2026/todos').set(todos);
+                saveData('todos', todos);
+                renderTodos('all');
             }
         }
 
         function deleteTodo(id) {
             todos = todos.filter(t => t.id !== id);
-            db.ref('hokkaido_2026/todos').set(todos);
+            saveData('todos', todos);
+            renderTodos('all');
         }
 
         function renderTodos(filter) {
             const container = document.getElementById('todo-list-container');
             container.innerHTML = '';
+
             const filtered = todos.filter(t => filter === 'all' || t.assignee === filter || t.assignee === '全體');
 
             filtered.forEach(t => {
@@ -1126,6 +1266,7 @@
         function renderTaxInformation() {
             const container = document.getElementById('tax-companies-container');
             container.innerHTML = '';
+
             const companies = ["J-TaxRefund", "Smart Detax", "PIE VAT", "Global Blue"];
 
             companies.forEach(comp => {
@@ -1136,24 +1277,41 @@
                 const card = document.createElement('div');
                 card.className = "bg-black/60 p-3 rounded border border-gray-700 text-xs space-y-2";
                 card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-gray-700 pb-1"><span class="font-bold text-amber-400 text-sm">📱 ${comp}</span><span class="text-[10px] text-gray-400">${allStores.length} 間配合店家</span></div>
-                    <div class="flex flex-wrap gap-1.5 pt-1">${allStores.map(store => `<span class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-gray-200 text-[11px]">${store}</span>`).join('')}</div>
+                    <div class="flex justify-between items-center border-b border-gray-700 pb-1">
+                        <span class="font-bold text-amber-400 text-sm">📱 ${comp}</span>
+                        <span class="text-[10px] text-gray-400">${allStores.length} 間配合店家</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 pt-1">
+                        ${allStores.map(store => `
+                            <span class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-gray-200 text-[11px]">
+                                ${store}
+                            </span>
+                        `).join('')}
+                    </div>
                 `;
                 container.appendChild(card);
             });
         }
 
         function toggleTaxAddModal() {
-            document.getElementById('tax-add-modal').classList.toggle('hidden');
+            const modal = document.getElementById('tax-add-modal');
+            modal.classList.toggle('hidden');
         }
 
         function saveCustomTaxStore() {
             const app = document.getElementById('modal-tax-app').value;
             const name = document.getElementById('modal-store-name').value.trim();
-            if(!name) return alert("請輸入店家名稱");
+
+            if(!name) {
+                alert("請輸入店家名稱");
+                return;
+            }
+
             if(!taxCustomStores[app]) taxCustomStores[app] = [];
             taxCustomStores[app].push(name);
-            db.ref('hokkaido_2026/tax_stores').set(taxCustomStores);
+
+            saveData('tax_stores', taxCustomStores);
+            renderTaxInformation();
             document.getElementById('modal-store-name').value = '';
             toggleTaxAddModal();
         }
@@ -1167,16 +1325,21 @@
                 img.src = e.target.result;
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    let width = img.width, height = img.height;
+                    let width = img.width;
+                    let height = img.height;
+
                     if (width > maxWidth) {
                         height = Math.round((height * maxWidth) / width);
                         width = maxWidth;
                     }
+
                     canvas.width = width;
                     canvas.height = height;
+
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    callback(canvas.toDataURL('image/jpeg', quality));
+                    const base64 = canvas.toDataURL('image/jpeg', quality);
+                    callback(base64);
                 };
             };
         }
