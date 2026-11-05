@@ -36,6 +36,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- Firebase SDK (即時雲端同步) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <style>
         /* Minecraft Dungeons Winter & Autumn Forest Bright Adventure Styling */
         body {
@@ -149,7 +153,10 @@
             </div>
             <div>
                 <h1 class="pixel-font text-sky-200 text-sm tracking-wide">Hokkaido</h1>
-                <p class="text-[10px] text-amber-300/90 font-semibold">隊伍：自由的感覺 <i class="fa-solid fa-chevron-right text-[8px]"></i></p>
+                <p class="text-[10px] text-amber-300/90 font-semibold flex items-center gap-1">
+                    <span>隊伍：自由的感覺</span>
+                    <span id="sync-badge" class="bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-1 py-0.2 rounded text-[9px]">⚡ 即時連線中</span>
+                </p>
             </div>
         </div>
         <div class="flex gap-1">
@@ -655,6 +662,19 @@
 
     <!-- JavaScript Data & Business Logic -->
     <script>
+        // ================= FIREBASE REALTIME DB INIT =================
+        const firebaseConfig = {
+            databaseURL: "https://hokkaido2026-default-rtdb.asia-southeast1.firebasedatabase.app/"
+        };
+        
+        let db = null;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        } catch (e) {
+            console.log("Firebase 雲端未設定或初始化失敗，退回單機模式", e);
+        }
+
         // ================= GLOBAL APP STATE =================
         let currentDay = 1;
         let isUnlocked = false;
@@ -705,44 +725,25 @@
             "Global Blue": ["UNIQLO", "GU", "The North Face (專賣店/Outlet)", "高島屋", "三越伊勢丹", "大丸松坂屋", "阪急百貨", "國際精品專櫃"]
         };
 
-        // Initialize LocalStorage arrays with pre-populated Expenses
-        let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || [
-            {
-                id: 1700000000001,
-                title: "機票來回 兩人",
-                curr: "TWD",
-                originalAmount: 30508,
-                jpy: Math.round(30508 / 0.215),
-                twd: 30508,
-                category: "交通",
-                payer: "Ginny",
-                photo: null,
-                date: "2026/11/08"
-            },
-            {
-                id: 1700000000000,
-                title: "飯店費用",
-                curr: "TWD",
-                originalAmount: 11191,
-                jpy: Math.round(11191 / 0.215),
-                twd: 11191,
-                category: "其他",
-                payer: "Ginny",
-                photo: null,
-                date: "2026/11/08"
-            }
+        // Default Data Fallbacks
+        const defaultExpenses = [
+            { id: 1700000000001, title: "機票來回 兩人", curr: "TWD", originalAmount: 30508, jpy: Math.round(30508 / 0.215), twd: 30508, category: "交通", payer: "Ginny", photo: null, date: "2026/11/08" },
+            { id: 1700000000000, title: "飯店費用", curr: "TWD", originalAmount: 11191, jpy: Math.round(11191 / 0.215), twd: 11191, category: "其他", payer: "Ginny", photo: null, date: "2026/11/08" }
         ];
-        let journals = JSON.parse(localStorage.getItem('hkd_journals')) || [];
-        let todos = JSON.parse(localStorage.getItem('hkd_todos')) || [
+        const defaultTodos = [
             { id: 1, text: "護照 (確認6個月以上有效期)", assignee: "全體", done: true },
             { id: 2, text: "日本 eSIM / 實體網卡準備", assignee: "Henry", done: true },
             { id: 3, text: "日幣現金與信用卡準備", assignee: "Ginny", done: false },
             { id: 4, text: "預約 11/10 札幌蟹家晚餐", assignee: "Ginny", done: false }
         ];
+
+        let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || defaultExpenses;
+        let journals = JSON.parse(localStorage.getItem('hkd_journals')) || [];
+        let todos = JSON.parse(localStorage.getItem('hkd_todos')) || defaultTodos;
         let vouchers = JSON.parse(localStorage.getItem('hkd_vouchers')) || [];
         let taxCustomStores = JSON.parse(localStorage.getItem('hkd_tax_stores')) || {};
 
-        // ================= APP INITIALIZATION =================
+        // ================= APP INITIALIZATION & FIREBASE LISTENERS =================
         window.onload = function() {
             try {
                 applySavedBackground();
@@ -751,14 +752,68 @@
                 renderJournals();
                 renderTodos('all');
                 renderTaxInformation();
+
+                // Setup Firebase Sync Listeners if db available
+                if (db) {
+                    setupFirebaseSync();
+                }
             } catch (err) {
-                console.warn("初始化部分模組警告 (已自動修正):", err);
+                console.warn("初始化視窗警告 (已自動平滑排除):", err);
             }
         };
 
+        function setupFirebaseSync() {
+            // Listen for Expenses changes across devices
+            db.ref('expenses').on('value', snapshot => {
+                const val = snapshot.val();
+                if (val) {
+                    expenses = Array.isArray(val) ? val : Object.values(val);
+                    localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
+                    renderExpenses();
+                }
+            });
+
+            // Listen for Todos changes across devices
+            db.ref('todos').on('value', snapshot => {
+                const val = snapshot.val();
+                if (val) {
+                    todos = Array.isArray(val) ? val : Object.values(val);
+                    localStorage.setItem('hkd_todos', JSON.stringify(todos));
+                    renderTodos('all');
+                }
+            });
+
+            // Listen for Journals changes
+            db.ref('journals').on('value', snapshot => {
+                const val = snapshot.val();
+                if (val) {
+                    journals = Array.isArray(val) ? val : Object.values(val);
+                    localStorage.setItem('hkd_journals', JSON.stringify(journals));
+                    renderJournals();
+                }
+            });
+
+            // Sync initial state to cloud if empty
+            db.ref('expenses').once('value', s => { if(!s.exists()) db.ref('expenses').set(expenses); });
+            db.ref('todos').once('value', s => { if(!s.exists()) db.ref('todos').set(todos); });
+        }
+
+        function pushCloud(path, data) {
+            localStorage.setItem(`hkd_${path}`, JSON.stringify(data));
+            if(db) {
+                db.ref(path).set(data).catch(e => console.log('Cloud sync error:', e));
+            }
+        }
+
         // Safety listeners for online/offline events
-        window.addEventListener('online', () => console.log('網路已連線'));
-        window.addEventListener('offline', () => console.log('離線模式運作中'));
+        window.addEventListener('online', () => {
+            const badge = document.getElementById('sync-badge');
+            if(badge) { badge.innerText = "⚡ 即時連線中"; badge.className = "bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-1 py-0.2 rounded text-[9px]"; }
+        });
+        window.addEventListener('offline', () => {
+            const badge = document.getElementById('sync-badge');
+            if(badge) { badge.innerText = "📡 離線備份中"; badge.className = "bg-amber-500/20 text-amber-300 border border-amber-400/40 px-1 py-0.2 rounded text-[9px]"; }
+        });
 
         // Background Image Management
         function applySavedBackground() {
@@ -901,94 +956,20 @@
 
             compressAndBase64(fileInput.files[0], 800, 0.6, (base64) => {
                 vouchers.push({ title: titleInput.value, image: base64, date: new Date().toLocaleDateString() });
-                localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
+                pushCloud('vouchers', vouchers);
                 titleInput.value = '';
                 fileInput.value = '';
                 renderVouchers();
             });
         }
 
-        function renderVouchers() {
-            const container = document.getElementById('voucher-list');
-            container.innerHTML = '';
-            if(vouchers.length === 0) {
-                container.innerHTML = `<div class="text-gray-400 text-xs">目前尚無上傳的憑證。</div>`;
-                return;
-            }
-            vouchers.forEach((v, index) => {
-                const item = document.createElement('div');
-                item.className = "bg-black/60 p-3 rounded border border-gray-700 text-xs space-y-2";
-                item.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-gray-700 pb-1.5">
-                        <div>
-                            <span class="font-bold text-amber-300 text-sm">${v.title}</span>
-                            <span class="text-[10px] text-gray-400 block">${v.date}</span>
-                        </div>
-                        <button onclick="deleteVoucher(${index})" class="text-red-400 hover:text-red-300 text-[11px]"><i class="fa-solid fa-trash mr-1"></i>刪除</button>
-                    </div>
-                    ${v.image ? `<img src="${v.image}" class="w-full rounded border border-gray-700 object-cover max-h-52 mt-1" onclick="viewImage('${v.image}')">` : ''}
-                `;
-                container.appendChild(item);
-            });
-        }
-
         function deleteVoucher(index) {
             vouchers.splice(index, 1);
-            localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
+            pushCloud('vouchers', vouchers);
             renderVouchers();
         }
 
         // ================= WALLET & EXPENSE LOGIC =================
-        function switchWalletSubTab(sub) {
-            if(sub === 'calc') {
-                document.getElementById('wallet-pane-calc').classList.remove('hidden');
-                document.getElementById('wallet-pane-summary').classList.add('hidden');
-                document.getElementById('wallet-subtab-1').className = "flex-1 py-1.5 text-center rounded font-bold bg-amber-500/20 text-amber-400";
-                document.getElementById('wallet-subtab-2').className = "flex-1 py-1.5 text-center rounded font-bold text-gray-400";
-            } else {
-                document.getElementById('wallet-pane-calc').classList.add('hidden');
-                document.getElementById('wallet-pane-summary').classList.remove('hidden');
-                document.getElementById('wallet-subtab-2').className = "flex-1 py-1.5 text-center rounded font-bold bg-amber-500/20 text-amber-400";
-                document.getElementById('wallet-subtab-1').className = "flex-1 py-1.5 text-center rounded font-bold text-gray-400";
-                renderCategorySummary();
-            }
-        }
-
-        function evaluateExpression() {
-            const expr = document.getElementById('calc-expression').value;
-            try {
-                const result = Function(`'use strict'; return (${expr})`)();
-                if(!isNaN(result)) {
-                    document.getElementById('expense-amount').value = Math.round(result);
-                    onCurrencyChange();
-                    calculateCurrency();
-                }
-            } catch(e) {
-                alert("算式格式錯誤");
-            }
-        }
-
-        function onCurrencyChange() {
-            calculateCurrency();
-        }
-
-        function calculateCurrency() {
-            const rate = parseFloat(document.getElementById('exchange-rate').value) || 0.215;
-            const curr = document.getElementById('expense-currency').value;
-            const amountInput = parseFloat(document.getElementById('expense-amount').value) || 0;
-
-            let valJpy = 0, valTwd = 0;
-            if(curr === 'JPY') {
-                valJpy = amountInput;
-                valTwd = Math.round(valJpy * rate);
-            } else {
-                valTwd = amountInput;
-                valJpy = Math.round(valTwd / rate);
-            }
-
-            document.getElementById('calc-result-jpy').innerText = `￥ ${valJpy.toLocaleString()} (約 NT$ ${valTwd.toLocaleString()})`;
-        }
-
         function addExpenseItem() {
             const title = document.getElementById('expense-title').value;
             const amount = parseFloat(document.getElementById('expense-amount').value);
@@ -1026,7 +1007,7 @@
                     date: new Date().toLocaleDateString()
                 };
                 expenses.unshift(item);
-                localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
+                pushCloud('expenses', expenses);
 
                 document.getElementById('expense-title').value = '';
                 document.getElementById('expense-amount').value = '';
@@ -1042,82 +1023,10 @@
             }
         }
 
-        function renderExpenses() {
-            const container = document.getElementById('expense-history-list');
-            container.innerHTML = '';
-
-            let totalJpy = 0;
-            let totalTwd = 0;
-
-            expenses.forEach((item, index) => {
-                totalJpy += item.jpy;
-                totalTwd += item.twd;
-
-                const div = document.createElement('div');
-                div.className = "bg-black/60 p-2 rounded border border-gray-700 flex justify-between items-center text-xs";
-                div.innerHTML = `
-                    <div class="space-y-0.5">
-                        <div class="font-bold text-white flex items-center gap-1">
-                            <span class="text-amber-400">[${item.category}]</span> ${item.title}
-                            <span class="text-[9px] bg-slate-800 text-gray-300 px-1 rounded">${item.payer}付</span>
-                        </div>
-                        <div class="text-[10px] text-gray-400">
-                            ${item.date} • ${item.curr === 'JPY' ? `￥${item.originalAmount}` : `NT$${item.originalAmount}`}
-                        </div>
-                    </div>
-                    <div class="text-right flex items-center gap-2">
-                        <div>
-                            <div class="font-bold text-emerald-400">NT$ ${item.twd.toLocaleString()}</div>
-                            <div class="text-[10px] text-gray-400">￥ ${item.jpy.toLocaleString()}</div>
-                        </div>
-                        ${item.photo ? `<button onclick="viewImage('${item.photo}')" class="text-amber-300 text-xs"><i class="fa-solid fa-receipt"></i></button>` : ''}
-                        <button onclick="deleteExpense(${index})" class="text-red-400 hover:text-red-200 text-xs ml-1"><i class="fa-solid fa-trash"></i></button>
-                    </div>
-                `;
-                container.appendChild(div);
-            });
-
-            document.getElementById('total-twd').innerText = `NT$ ${totalTwd.toLocaleString()}`;
-            document.getElementById('total-jpy').innerText = `￥ ${totalJpy.toLocaleString()}`;
-        }
-
         function deleteExpense(index) {
             expenses.splice(index, 1);
-            localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
+            pushCloud('expenses', expenses);
             renderExpenses();
-        }
-
-        function renderCategorySummary() {
-            const container = document.getElementById('category-summary-list');
-            container.innerHTML = '';
-
-            const categories = ["餐飲", "交通", "購物", "門票", "其他"];
-            const summary = {};
-            categories.forEach(c => summary[c] = { twd: 0, jpy: 0, count: 0 });
-
-            expenses.forEach(e => {
-                const cat = summary[e.category] ? e.category : "其他";
-                summary[cat].twd += e.twd;
-                summary[cat].jpy += e.jpy;
-                summary[cat].count += 1;
-            });
-
-            categories.forEach(cat => {
-                const data = summary[cat];
-                const card = document.createElement('div');
-                card.className = "bg-black/60 p-3 rounded border border-gray-700 text-xs flex justify-between items-center";
-                card.innerHTML = `
-                    <div>
-                        <span class="font-bold text-amber-300 text-sm">${cat}</span>
-                        <span class="text-[10px] text-gray-400 block">${data.count} 筆消費紀錄</span>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-bold text-emerald-400 text-sm">NT$ ${data.twd.toLocaleString()}</div>
-                        <div class="text-[10px] text-gray-400">￥ ${data.jpy.toLocaleString()}</div>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
         }
 
         // ================= JOURNAL LOGIC =================
@@ -1142,7 +1051,7 @@
                     time: new Date().toLocaleString('zh-TW', { hour12: false })
                 };
                 journals.unshift(post);
-                localStorage.setItem('hkd_journals', JSON.stringify(journals));
+                pushCloud('journals', journals);
 
                 document.getElementById('journal-title').value = '';
                 document.getElementById('journal-text').value = '';
@@ -1157,37 +1066,9 @@
             }
         }
 
-        function renderJournals() {
-            const container = document.getElementById('journal-feed');
-            container.innerHTML = '';
-
-            if(journals.length === 0) {
-                container.innerHTML = `<div class="pixel-box p-4 text-center text-xs text-gray-400">尚未發表任何冒險動態，快來分享第一張照片吧！</div>`;
-                return;
-            }
-
-            journals.forEach((post, index) => {
-                const card = document.createElement('div');
-                card.className = "pixel-box p-3 bg-slate-900/90 space-y-2 text-xs";
-                card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-gray-700 pb-1.5">
-                        <span class="font-bold text-amber-300">${post.author}</span>
-                        <span class="text-[10px] text-gray-400">${post.time}</span>
-                    </div>
-                    <div class="font-bold text-sm text-white">${post.title}</div>
-                    <p class="text-gray-300 leading-relaxed">${post.text}</p>
-                    ${post.image ? `<img src="${post.image}" class="w-full rounded border border-gray-700 object-cover max-h-60 mt-2">` : ''}
-                    <div class="text-right pt-1">
-                        <button onclick="deleteJournal(${index})" class="text-red-400 text-[10px] hover:underline">刪除日誌</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
         function deleteJournal(index) {
             journals.splice(index, 1);
-            localStorage.setItem('hkd_journals', JSON.stringify(journals));
+            pushCloud('journals', journals);
             renderJournals();
         }
 
@@ -1199,7 +1080,7 @@
 
             const newTodo = { id: Date.now(), text, assignee, done: false };
             todos.push(newTodo);
-            localStorage.setItem('hkd_todos', JSON.stringify(todos));
+            pushCloud('todos', todos);
 
             document.getElementById('new-todo-text').value = '';
             renderTodos('all');
@@ -1209,36 +1090,15 @@
             const item = todos.find(t => t.id === id);
             if(item) {
                 item.done = !item.done;
-                localStorage.setItem('hkd_todos', JSON.stringify(todos));
+                pushCloud('todos', todos);
                 renderTodos('all');
             }
         }
 
         function deleteTodo(id) {
             todos = todos.filter(t => t.id !== id);
-            localStorage.setItem('hkd_todos', JSON.stringify(todos));
+            pushCloud('todos', todos);
             renderTodos('all');
-        }
-
-        function renderTodos(filter) {
-            const container = document.getElementById('todo-list-container');
-            container.innerHTML = '';
-
-            const filtered = todos.filter(t => filter === 'all' || t.assignee === filter || t.assignee === '全體');
-
-            filtered.forEach(t => {
-                const row = document.createElement('div');
-                row.className = `p-2 rounded border flex justify-between items-center text-xs ${t.done ? 'bg-black/30 border-gray-800 text-gray-500 line-through' : 'bg-black/60 border-gray-700 text-gray-200'}`;
-                row.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTodo(${t.id})" class="accent-amber-500 rounded">
-                        <span>${t.text}</span>
-                        <span class="text-[9px] bg-slate-800 text-amber-300 px-1 py-0.5 rounded">${t.assignee}</span>
-                    </div>
-                    <button onclick="deleteTodo(${t.id})" class="text-gray-500 hover:text-red-400 text-xs"><i class="fa-solid fa-xmark"></i></button>
-                `;
-                container.appendChild(row);
-            });
         }
 
         // ================= TAX INFORMATION LOGIC =================
