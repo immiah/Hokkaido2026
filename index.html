@@ -36,6 +36,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- Firebase SDK (Compat Version for Realtime Database) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
+
     <style>
         /* Minecraft Dungeons Winter & Autumn Forest Bright Adventure Styling */
         body {
@@ -139,7 +143,7 @@
         }
     </style>
 </head>
-<body class="pb-24 pt-4 px-3 min-h-screen">
+<body class="pb-28 pt-4 px-3 min-h-screen">
 
     <!-- Top Navigation Header -->
     <header class="max-w-md mx-auto mb-4 pixel-box p-3 flex justify-between items-center bg-slate-900/25 backdrop-blur-md">
@@ -149,7 +153,10 @@
             </div>
             <div>
                 <h1 class="pixel-font text-sky-200 text-sm tracking-wide">Hokkaido</h1>
-                <p class="text-[10px] text-amber-300/90 font-semibold">隊伍：自由的感覺 <i class="fa-solid fa-chevron-right text-[8px]"></i></p>
+                <p class="text-[10px] text-amber-300/90 font-semibold flex items-center gap-1">
+                    <span>隊伍：自由的感覺</span>
+                    <span id="cloud-status-badge" class="bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded text-[9px]">⚡ 雲端連線</span>
+                </p>
             </div>
         </div>
         <div class="flex gap-1">
@@ -182,7 +189,7 @@
                 <button onclick="switchDay(5)" id="day-btn-5" class="pixel-btn px-3 py-2 text-xs font-bold whitespace-nowrap flex-1 text-center">Day 5<br><span class="text-[10px] text-gray-400">11/12(四)</span></button>
             </div>
 
-            <!-- Special Weather & Ropeway Widget (Displayed on Day 3 / Day 1) -->
+            <!-- Special Weather & Ropeway Widget -->
             <div id="day1-ropeway-widget" class="pixel-box-gold p-3 rounded">
                 <div class="flex justify-between items-center mb-2">
                     <span class="pixel-font text-xs text-amber-400 flex items-center gap-1">
@@ -209,20 +216,16 @@
             </div>
 
             <!-- Itinerary Timeline Card Container -->
-            <div id="itinerary-list" class="space-y-3">
-                <!-- Dynamically populated via JavaScript -->
-            </div>
+            <div id="itinerary-list" class="space-y-3"></div>
         </section>
 
         <!-- ================= PAGE 2: BOOKINGS (預訂) ================= -->
         <section id="tab-bookings" class="tab-content hidden space-y-4">
-            <!-- Flights Section (Boarding Pass View) -->
             <div class="pixel-box p-4 bg-slate-900/25">
                 <h3 class="pixel-font text-amber-400 text-xs mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-plane"></i> 航班資訊 (BOARDING PASS)
                 </h3>
                 
-                <!-- Departure Flight -->
                 <div class="border border-dashed border-sky-300/30 p-3 rounded mb-3 bg-slate-950/20">
                     <div class="flex justify-between items-center border-b border-gray-700/50 pb-2 mb-2">
                         <span class="text-xs font-bold text-amber-300">去程 • tigersmart IT234</span>
@@ -246,7 +249,6 @@
                     </div>
                 </div>
 
-                <!-- Return Flight -->
                 <div class="border border-dashed border-sky-300/30 p-3 rounded bg-slate-950/20">
                     <div class="flex justify-between items-center border-b border-gray-700/50 pb-2 mb-2">
                         <span class="text-xs font-bold text-amber-300">回程 • tigersmart IT235</span>
@@ -271,7 +273,6 @@
                 </div>
             </div>
 
-            <!-- Hotel Booking Section (Mitsui Garden Hotel Sapporo West) -->
             <div class="pixel-box p-4 bg-slate-900/25">
                 <h3 class="pixel-font text-amber-400 text-xs mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-hotel"></i> 住宿資訊 (11/08 - 11/12 4晚)
@@ -283,16 +284,10 @@
                         <div>Check-in: <span class="text-amber-300">15:00 後</span></div>
                         <div>Check-out: <span class="text-amber-300">11:00 前</span></div>
                     </div>
-                    <div class="pt-2 flex justify-between items-center text-gray-300">
-                        <span>預計入住隊員: Henry, Ginny</span>
-                        <a href="https://maps.google.com/?q=Mitsui+Garden+Hotel+Sapporo+West" target="_blank" class="pixel-btn text-[10px] px-2 py-1 text-amber-300">
-                            導航地圖 <i class="fa-solid fa-location-arrow"></i>
-                        </a>
-                    </div>
                 </div>
             </div>
 
-            <!-- Protected Vouchers Section (PIN required) -->
+            <!-- Protected Vouchers Section -->
             <div class="pixel-box p-4 bg-slate-900/60">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="pixel-font text-amber-400 text-xs flex items-center gap-2">
@@ -301,7 +296,6 @@
                     <span id="pin-status-tag" class="text-[10px] bg-red-900/80 text-red-200 px-2 py-0.5 rounded">未解鎖</span>
                 </div>
 
-                <!-- PIN Entry Form -->
                 <div id="pin-lock-screen" class="space-y-2">
                     <p class="text-xs text-gray-400">請輸入 PIN 碼 (提示: 旅遊年份 YEAR):</p>
                     <div class="flex gap-2">
@@ -310,12 +304,9 @@
                     </div>
                 </div>
 
-                <!-- Hidden Voucher Content -->
                 <div id="voucher-content" class="hidden space-y-3 pt-2">
                     <div class="text-xs text-emerald-400 mb-2">✓ 寶箱已解鎖！以下為上傳的票券憑證：</div>
-                    <div id="voucher-list" class="space-y-3">
-                        <!-- Voucher Items -->
-                    </div>
+                    <div id="voucher-list" class="space-y-3"></div>
                     
                     <div class="border-t border-gray-700 pt-3">
                         <label class="block text-xs text-gray-300 mb-1">新增憑證圖片：</label>
@@ -327,18 +318,14 @@
             </div>
         </section>
 
-        <!-- ================= PAGE 3: WALLET & EXPENSE (記帳與匯率) ================= -->
+        <!-- ================= PAGE 3: WALLET & EXPENSE ================= -->
         <section id="tab-wallet" class="tab-content hidden space-y-4">
-            
-            <!-- Sub-tab Selector for Wallet -->
             <div class="flex bg-slate-900 border-2 border-gray-700 rounded p-1 text-xs">
                 <button id="wallet-subtab-1" onclick="switchWalletSubTab('calc')" class="flex-1 py-1.5 text-center rounded font-bold bg-amber-500/20 text-amber-400">即時算盤/記帳</button>
                 <button id="wallet-subtab-2" onclick="switchWalletSubTab('summary')" class="flex-1 py-1.5 text-center rounded font-bold text-gray-400">類別總金額分頁</button>
             </div>
 
-            <!-- SUB-TAB 1: Calculator & Add Expense -->
             <div id="wallet-pane-calc" class="space-y-4">
-                <!-- Currency Calculator -->
                 <div class="pixel-box p-3 bg-slate-900/90">
                     <div class="flex justify-between items-center mb-2">
                         <span class="pixel-font text-xs text-amber-400"><i class="fa-solid fa-calculator"></i> 匯率算盤 (JPY ➔ TWD)</span>
@@ -347,7 +334,7 @@
                         </div>
                     </div>
                     <div class="space-y-2">
-                        <input type="text" id="calc-expression" placeholder="輸入算式如 500+200*3" class="w-full bg-black/80 border border-gray-700 p-2 text-right pixel-subfont text-xl text-amber-400 rounded focus:outline-none focus:border-amber-400">
+                        <input type="text" id="calc-expression" placeholder="輸入算式如 500+200*3" class="w-full bg-black/80 border border-gray-700 p-2 text-right pixel-subfont text-xl text-amber-400 rounded focus:outline-none">
                         <div class="flex justify-between items-center text-xs px-1">
                             <span class="text-gray-400">計算結果:</span>
                             <span class="font-bold text-lg text-emerald-400" id="calc-result-jpy">￥ 0 (約 NT$ 0)</span>
@@ -356,12 +343,11 @@
                     </div>
                 </div>
 
-                <!-- Add Expense Form -->
                 <div class="pixel-box p-3 bg-slate-900/90 space-y-2">
-                    <h3 class="pixel-font text-xs text-amber-400 mb-1"><i class="fa-solid fa-plus-circle"></i> 新增冒險花費</h3>
+                    <h3 class="pixel-font text-xs text-amber-400 mb-1"><i class="fa-solid fa-plus-circle"></i> 新增冒險花費 (選填)</h3>
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                            <label class="text-gray-400 block mb-0.5">幣別與金額</label>
+                            <label class="text-gray-400 block mb-0.5">幣別與金額 *</label>
                             <div class="flex gap-1">
                                 <select id="expense-currency" onchange="onCurrencyChange()" class="bg-black border border-gray-700 text-amber-300 rounded px-1 py-1 text-xs">
                                     <option value="JPY">￥ JPY</option>
@@ -371,7 +357,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="text-gray-400 block mb-0.5">花費品項</label>
+                            <label class="text-gray-400 block mb-0.5">花費品項 (留空自動帶入)</label>
                             <input type="text" id="expense-title" placeholder="如 一幻拉麵" class="w-full bg-black border border-gray-700 p-1 text-white rounded">
                         </div>
                     </div>
@@ -383,7 +369,7 @@
                                 <option value="交通">🚃 交通票券</option>
                                 <option value="購物">🛍️ 購物戰利品</option>
                                 <option value="門票">🎟️ 門票娛樂</option>
-                                <option value="其他">📦 其他雜項</option>
+                                <option value="其他" selected>📦 其他雜項</option>
                             </select>
                         </div>
                         <div>
@@ -395,41 +381,33 @@
                             </select>
                         </div>
                     </div>
-                    <!-- Receipt Photo Upload -->
                     <div>
-                        <label class="text-gray-400 text-xs block mb-0.5">收據/小票拍照上傳 (自動壓縮)</label>
+                        <label class="text-gray-400 text-xs block mb-0.5">收據/小票拍照上傳 (選填)</label>
                         <input type="file" id="expense-photo" accept="image/*" class="text-xs text-gray-400 w-full">
                     </div>
                     <button onclick="addExpenseItem()" class="pixel-btn-gold w-full py-2 text-xs font-bold mt-1">寫入金庫記事本 📜</button>
                 </div>
 
-                <!-- Expense Dashboard & List -->
                 <div class="pixel-box p-3 bg-slate-900/90">
                     <div class="flex justify-between items-center mb-2 border-b border-gray-700 pb-2">
-                        <span class="pixel-font text-xs text-amber-400">總支出儀表板</span>
+                        <span class="pixel-font text-xs text-amber-400">總支出儀表板 (雙機即時同步)</span>
                         <div class="text-right text-xs">
                             <span class="text-emerald-400 font-bold block" id="total-twd">NT$ 0</span>
                             <span class="text-gray-400 text-[10px]" id="total-jpy">￥ 0</span>
                         </div>
                     </div>
-                    <div id="expense-history-list" class="space-y-2 max-h-64 overflow-y-auto">
-                        <!-- Expense List Items -->
-                    </div>
+                    <div id="expense-history-list" class="space-y-2 max-h-64 overflow-y-auto"></div>
                 </div>
             </div>
 
-            <!-- SUB-TAB 2: Category Summary View -->
             <div id="wallet-pane-summary" class="hidden space-y-3">
                 <div class="pixel-box p-3 bg-slate-900/90">
                     <h3 class="pixel-font text-amber-400 text-xs mb-3 flex items-center gap-2">
                         <i class="fa-solid fa-chart-pie"></i> 個別類別支出總計 (TWD / JPY)
                     </h3>
-                    <div id="category-summary-list" class="space-y-2">
-                        <!-- Category Summaries dynamically rendered -->
-                    </div>
+                    <div id="category-summary-list" class="space-y-2"></div>
                 </div>
             </div>
-
         </section>
 
         <!-- ================= PAGE 4: JOURNAL (日誌) ================= -->
@@ -439,8 +417,8 @@
                     <i class="fa-solid fa-camera-retro"></i> 冒險圖文日誌 (JOURNAL)
                 </h3>
                 <div class="space-y-2 text-xs">
-                    <input type="text" id="journal-title" placeholder="日誌標題 (如 小樽運河夜景)" class="w-full bg-black border border-gray-700 p-1.5 rounded text-white">
-                    <textarea id="journal-text" rows="2" placeholder="分享這一刻的冒險心得..." class="w-full bg-black border border-gray-700 p-1.5 rounded text-white"></textarea>
+                    <input type="text" id="journal-title" placeholder="日誌標題 (留空自動帶入)" class="w-full bg-black border border-gray-700 p-1.5 rounded text-white">
+                    <textarea id="journal-text" rows="2" placeholder="分享這一刻的冒險心得 (選填)..." class="w-full bg-black border border-gray-700 p-1.5 rounded text-white"></textarea>
                     <div class="flex gap-2 items-center">
                         <select id="journal-author" class="bg-black border border-gray-700 p-1 rounded text-amber-300">
                             <option value="Ginny (魔法師)">Ginny (魔法師)</option>
@@ -452,10 +430,7 @@
                 </div>
             </div>
 
-            <!-- Journal Feed List -->
-            <div id="journal-feed" class="space-y-4">
-                <!-- Dynamically added posts -->
-            </div>
+            <div id="journal-feed" class="space-y-4"></div>
         </section>
 
         <!-- ================= PAGE 5: LISTS (清單) ================= -->
@@ -470,7 +445,6 @@
                     </div>
                 </div>
 
-                <!-- Add Task Form -->
                 <div class="flex gap-1 mb-3">
                     <input type="text" id="new-todo-text" placeholder="新增準備項目 (如 護照/網卡)..." class="bg-black/50 border border-sky-300/30 p-1.5 rounded text-xs w-full text-white placeholder-gray-400">
                     <select id="new-todo-assignee" class="bg-black/50 border border-sky-300/30 text-xs text-amber-300 rounded px-1">
@@ -483,7 +457,6 @@
                     <button onclick="addTodoItem()" class="pixel-btn-gold px-3 py-1 text-xs font-bold">新增</button>
                 </div>
 
-                <!-- Todo Filter Pills -->
                 <div class="flex gap-1 text-[11px] mb-2 overflow-x-auto pb-1">
                     <button onclick="renderTodos('all')" class="pixel-btn px-2 py-0.5 text-amber-300">全部</button>
                     <button onclick="renderTodos('Henry')" class="pixel-btn px-2 py-0.5 text-gray-200">Henry</button>
@@ -492,17 +465,12 @@
                     <button onclick="renderTodos('Rain')" class="pixel-btn px-2 py-0.5 text-gray-200">Rain</button>
                 </div>
 
-                <!-- List Items -->
-                <div id="todo-list-container" class="space-y-1.5">
-                    <!-- Dynamic Todos -->
-                </div>
+                <div id="todo-list-container" class="space-y-1.5"></div>
             </div>
         </section>
 
         <!-- ================= PAGE 6: INFO (情報) ================= -->
         <section id="tab-info" class="tab-content hidden space-y-4">
-            
-            <!-- External Weather & Useful Info -->
             <div class="pixel-box p-3 bg-slate-900/90">
                 <h3 class="pixel-font text-amber-400 text-xs mb-2 flex items-center gap-2">
                     <i class="fa-solid fa-sun-cloud"></i> 當地實用氣象與連結
@@ -517,25 +485,14 @@
                 </div>
             </div>
 
-            <!-- Tax Free Partner Stores breakdown by Tax Companies (J-TaxRefund, Smart Detax, PIE VAT, Global Blue) -->
             <div class="pixel-box p-3 bg-slate-900/90 space-y-3">
                 <div class="flex justify-between items-center border-b border-gray-700 pb-2">
                     <h3 class="pixel-font text-amber-400 text-xs flex items-center gap-2">
                         <i class="fa-solid fa-receipt"></i> 2026 日本退稅新制與配合 APP 店家
                     </h3>
-                    <button onclick="toggleTaxAddModal()" class="pixel-btn-gold text-[10px] px-2 py-1">
-                        + 新增配合店家
-                    </button>
+                    <button onclick="toggleTaxAddModal()" class="pixel-btn-gold text-[10px] px-2 py-1">+ 新增配合店家</button>
                 </div>
-                
-                <p class="text-[11px] text-gray-300 leading-relaxed bg-black/40 p-2 rounded border border-amber-500/20">
-                    💡 <strong class="text-amber-400">2026/11 日本退稅新制懶人包：</strong> 機場設立自助退稅機台，或可下載以下指定退稅 APP 使用信用卡進行離境退稅。
-                </p>
-
-                <!-- Tax Companies Accordion Container -->
-                <div id="tax-companies-container" class="space-y-3">
-                    <!-- Tax items dynamically loaded from script -->
-                </div>
+                <div id="tax-companies-container" class="space-y-3"></div>
             </div>
         </section>
 
@@ -548,49 +505,19 @@
                     </h3>
                     <p class="text-[11px] text-sky-200 mt-1">隊伍名稱：<span class="font-bold text-amber-300">自由的感覺</span></p>
                 </div>
-                
                 <div class="grid grid-cols-1 gap-3">
-                    <!-- Member 1: Henry -->
                     <div class="flex items-center space-x-3 bg-black/25 p-2.5 rounded border border-red-500/40">
-                        <div class="w-12 h-12 bg-red-900/40 border border-red-400 rounded flex items-center justify-center text-xl">
-                            ⚔️
-                        </div>
+                        <div class="w-12 h-12 bg-red-900/40 border border-red-400 rounded flex items-center justify-center text-xl">⚔️</div>
                         <div>
                             <div class="font-bold text-sm text-amber-300">Henry <span class="text-xs text-red-400 ml-1">(攻擊手 • 本次參隊)</span></div>
                             <div class="text-xs text-gray-200">主力輸出 / 路線規劃 / 烤肉擔當</div>
                         </div>
                     </div>
-
-                    <!-- Member 2: Ginny -->
                     <div class="flex items-center space-x-3 bg-black/25 p-2.5 rounded border border-purple-500/40">
-                        <div class="w-12 h-12 bg-purple-900/40 border border-purple-400 rounded flex items-center justify-center text-xl">
-                            🧙‍♀️
-                        </div>
+                        <div class="w-12 h-12 bg-purple-900/40 border border-purple-400 rounded flex items-center justify-center text-xl">🧙‍♀️</div>
                         <div>
                             <div class="font-bold text-sm text-purple-300">Ginny <span class="text-xs text-purple-400 ml-1">(魔法師 • 本次參隊)</span></div>
                             <div class="text-xs text-gray-200">購物魔法 / 美食甜點搜尋 / 記帳大師</div>
-                        </div>
-                    </div>
-
-                    <!-- Member 3: Ciao -->
-                    <div class="flex items-center space-x-3 bg-black/20 p-2.5 rounded border border-gray-600/30 opacity-75">
-                        <div class="w-12 h-12 bg-emerald-900/30 border border-emerald-500/30 rounded flex items-center justify-center text-xl">
-                            🧪
-                        </div>
-                        <div>
-                            <div class="font-bold text-sm text-gray-300">Ciao <span class="text-xs text-gray-400 ml-1">(補師 • 未參與這次冒險)</span></div>
-                            <div class="text-xs text-gray-400">後勤補給 / 留守基地</div>
-                        </div>
-                    </div>
-
-                    <!-- Member 4: Rain -->
-                    <div class="flex items-center space-x-3 bg-black/20 p-2.5 rounded border border-gray-600/30 opacity-75">
-                        <div class="w-12 h-12 bg-yellow-900/30 border border-yellow-500/30 rounded flex items-center justify-center text-xl">
-                            🤡
-                        </div>
-                        <div>
-                            <div class="font-bold text-sm text-gray-300">Rain <span class="text-xs text-gray-400 ml-1">(小丑 • 未參與這次冒險)</span></div>
-                            <div class="text-xs text-gray-400">氣氛製造 / 留守基地</div>
                         </div>
                     </div>
                 </div>
@@ -624,159 +551,182 @@
     </div>
 
     <!-- Bottom Fixed Pixel Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-950/95 border-t-4 border-gray-800 z-40 backdrop-blur">
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-950/95 border-t-4 border-gray-800 z-40 backdrop-blur pb-[env(safe-area-inset-bottom)]">
         <div class="max-w-md mx-auto grid grid-cols-6 text-center text-[10px]">
-            <button onclick="switchTab('plan')" id="nav-plan" class="py-2 text-amber-400 tab-active flex flex-col items-center">
+            <button onclick="switchTab('plan')" id="nav-plan" class="py-3 text-amber-400 tab-active flex flex-col items-center">
                 <i class="fa-solid fa-map-location-dot text-sm mb-0.5"></i>
                 <span>行程</span>
             </button>
-            <button onclick="switchTab('bookings')" id="nav-bookings" class="py-2 text-gray-400 flex flex-col items-center">
+            <button onclick="switchTab('bookings')" id="nav-bookings" class="py-3 text-gray-400 flex flex-col items-center">
                 <i class="fa-solid fa-ticket text-sm mb-0.5"></i>
                 <span>預訂</span>
             </button>
-            <button onclick="switchTab('wallet')" id="nav-wallet" class="py-2 text-gray-400 flex flex-col items-center">
+            <button onclick="switchTab('wallet')" id="nav-wallet" class="py-3 text-gray-400 flex flex-col items-center">
                 <i class="fa-solid fa-coins text-sm mb-0.5"></i>
                 <span>記帳</span>
             </button>
-            <button onclick="switchTab('journal')" id="nav-journal" class="py-2 text-gray-400 flex flex-col items-center">
+            <button onclick="switchTab('journal')" id="nav-journal" class="py-3 text-gray-400 flex flex-col items-center">
                 <i class="fa-solid fa-book-bookmark text-sm mb-0.5"></i>
                 <span>日誌</span>
             </button>
-            <button onclick="switchTab('lists')" id="nav-lists" class="py-2 text-gray-400 flex flex-col items-center">
+            <button onclick="switchTab('lists')" id="nav-lists" class="py-3 text-gray-400 flex flex-col items-center">
                 <i class="fa-solid fa-check-double text-sm mb-0.5"></i>
                 <span>清單</span>
             </button>
-            <button onclick="switchTab('info')" id="nav-info" class="py-2 text-gray-400 flex flex-col items-center">
+            <button onclick="switchTab('info')" id="nav-info" class="py-3 text-gray-400 flex flex-col items-center">
                 <i class="fa-solid fa-circle-info text-sm mb-0.5"></i>
                 <span>情報</span>
             </button>
         </div>
     </nav>
 
-    <!-- JavaScript Data & Business Logic -->
+    <!-- JavaScript Data & Business Logic with Firebase Sync -->
     <script>
+        // ================= FIREBASE CLOUD CONFIG =================
+        const firebaseConfig = {
+            databaseURL: "https://hokkaido-2026-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
         // ================= GLOBAL APP STATE =================
         let currentDay = 1;
         let isUnlocked = false;
         let savedBgImage = localStorage.getItem('hkd_bg_image') || null;
 
-        // Default Itinerary Data directly from PDF (札幌 5 天 4 夜 慢旅手冊)
         const itineraryData = {
             1: [
                 { time: "10:55", title: "抵達新千歲機場 (CTS)", desc: "下機、通關與提行李約需 40–50 分鐘。", type: "flight" },
                 { time: "11:40–12:20", title: "搭乘 JR 快速 Airport 直達 JR 札幌站", desc: "車程約 40 分鐘。每 12 分鐘一班，錯過順延下一班即可。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
-                { time: "12:30–14:00", title: "飯店寄放行李 ✕ 午餐 (札幌站周邊)", desc: "1. 奧芝商店 駅前創成寺(招牌濃郁蝦湯底湯咖哩)\n2. 一幻蝦拉麵 (札幌站地下街分店)\n3. 一夜干海鮮丼Dekitateya 鐘樓店 or stellar place 6F也有。", map: "https://maps.google.com/?q=Sapporo+Station", type: "food" },
-                { time: "14:30–17:00", title: "大通公園散步 ✕ 戶外品牌購物 ✕ 甜點巡禮", desc: "1. 走 Chi-Ka-Ho 地下步行空間直通大通商圈\n2. Patagonia 札幌大通旗艦店 & mont-bell 赤れんが Terrace 店/PILLARS店\n3. 香水：Stellar Place (SHIRO, Aux Paradis, SHOLAYERED)\n4. 必吃甜點：KINOTOYA Cafe Odori Bisse (極濃牛奶霜淇淋)、北菓樓 札幌本館 (夢不思議大泡芙)", map: "https://maps.google.com/?q=Chi-Ka-Ho+Sapporo", type: "spot" },
-                { time: "17:30–19:30", title: "晚餐：成吉思汗烤羊肉 / 燒肉 / 湯咖哩", desc: "1. 達摩 (だるま) 薄野各分店 (建議 17:00 前候位)\n2. Yakiniku Jingisukan Horumon Fudo Susukino\n3. 肉處ぎんべこや (白老和牛燒肉與丼飯)\n4. 湯咖哩備案：GARAKU、Suage+、Picante 札幌站前店、SAMA", map: "https://maps.google.com/?q=Daruma+Susukino", type: "food" },
-                { time: "20:00–21:30", title: "狸小路散步 ✕ 夜間聖代 (夜パフェ)", desc: "1. 夜帕フェ體驗：Parfaiteria PaL 或 Initial (初期)\n2. 宵夜備案：Hirihiri 2號店 (湯咖哩)", map: "https://maps.google.com/?q=Tanukikoji+Shopping+Street", type: "spot" }
+                { time: "12:30–14:00", title: "飯店寄放行李 ✕ 午餐 (札幌站周邊)", desc: "1. 奧芝商店 駅前創成寺(招牌濃郁蝦湯底湯咖哩)\n2. 一幻蝦拉麵 (札幌站地下街分店)", map: "https://maps.google.com/?q=Sapporo+Station", type: "food" },
+                { time: "14:30–17:00", title: "大通公園散步 ✕ 戶外品牌購物", desc: "走 Chi-Ka-Ho 地下步行空間直通大通商圈。", map: "https://maps.google.com/?q=Chi-Ka-Ho+Sapporo", type: "spot" },
+                { time: "17:30–19:30", title: "晚餐：成吉思汗烤羊肉 / 湯咖哩", desc: "達摩 (だるま) 薄野各分店 (建議 17:00 前候位)。", map: "https://maps.google.com/?q=Daruma+Susukino", type: "food" }
             ],
             2: [
-                { time: "09:30–10:10", title: "搭乘 JR 快速列車前往 JR 小樽站", desc: "車程約 40 分鐘。建議坐右側車窗欣賞石狩灣海景 (可提前劃指定席)。", transit: "JR 快速 Express", cost: "￥750", type: "transit" },
-                { time: "10:30–12:00", title: "【午餐】小樽三角市場或在地美食", desc: "1. 三角市場海鮮丼：滝波食堂、武田鮮魚店、三角亭\n2. 二角市場：丼兵衛小樽運河店\n3. 熟食備案：若雞時代なると本店 (必吃香酥炸半雞定食)", map: "https://maps.google.com/?q=Otaru+Sankaku+Market", type: "food" },
-                { time: "12:30–16:30", title: "小樽運河與堺町通商店街散步", desc: "順向路線：三角市場 ➔ 小樽運河 ➔ 堺町通 (北一硝子、小樽音樂盒堂) ➔ 最終步行至 JR 南小樽站搭車返回。\n甜點巡禮：LeTAO 本店 (雙層起司蛋糕)、六花亭 小樽運河店、北菓樓 小樽本館。", map: "https://maps.google.com/?q=Otaru+Canal", type: "spot" },
-                { time: "17:00–18:30", title: "【晚餐】小樽在地名店", desc: "老字號 Yabuhan Soba (薮半) 鴨肉高湯蕎麥麵，或壽司屋通 (Sushiya-dori) 海鮮壽司。", map: "https://maps.google.com/?q=Yabuhan+Soba+Otaru", type: "food" },
-                { time: "19:00–19:40", title: "搭乘 JR (南小樽站或小樽站) 返回札幌", desc: "輕鬆搭車返回札幌飯店，或返回札幌吃晚餐/宵夜。", transit: "JR 快速", cost: "￥750", type: "transit" }
+                { time: "09:30–10:10", title: "搭乘 JR 快速列車前往 JR 小樽站", desc: "車程約 40 分鐘。", transit: "JR 快速 Express", cost: "￥750", type: "transit" },
+                { time: "10:30–12:00", title: "【午餐】小樽三角市場或在地美食", desc: "三角市場海鮮丼。", map: "https://maps.google.com/?q=Otaru+Sankaku+Market", type: "food" },
+                { time: "12:30–16:30", title: "小樽運河與堺町通商店街散步", desc: "北一硝子、小樽音樂盒堂。", map: "https://maps.google.com/?q=Otaru+Canal", type: "spot" }
             ],
             3: [
-                { time: "09:30–11:30", title: "北海道神宮 參拜", desc: "搭地鐵東西線至「圓山公園站」。必吃神宮境內六花亭神宮茶屋限定現煎「判官樣」紅豆蕎麥餅。", transit: "地鐵東西線", cost: "￥210", map: "https://maps.google.com/?q=Hokkaido+Shrine", type: "spot" },
-                { time: "12:00–13:30", title: "【午餐】和牛燒肉或壽司", desc: "Yakiniku Tokuju K-Place (午餐高CP) 或 肉處ぎんべこや (白老和牛燒肉) 或 Toriton 迴轉壽司。", map: "https://maps.google.com/?q=Toriton+Sushi+Sapporo", type: "food" },
-                { time: "14:00–18:00", title: "【方案A/B】市區核心購物時間", desc: "1. 狸小路商店街：採購藥妝、伴手禮、業務超市狸小路店。\n2. Sapporo PARCO：逛日系潮流服飾與銀飾選品 (S.O.S fp, Flags Sapporo 代理 First Arrow's 銀飾).\n貼心提醒：買完戰利品可先拿回飯店寄放。", map: "https://maps.google.com/?q=Sapporo+PARCO", type: "spot" },
-                { time: "15:00–19:00", title: "【方案B】藻岩山纜車賞夜景 (偏冷風大)", desc: "15:15 搭乘札幌市電至「纜車入口站」➔ 15:35 轉免費接駁巴士至山麓站 ➔ 16:00 雙段纜車登頂 (大型纜車 + 莫ーリス號)。", transit: "市電 + 接駁車 + 纜車", cost: "￥2,100", map: "https://maps.google.com/?q=Mt.+Moiwa+Ropeway", type: "spot" },
-                { time: "18:30–21:30", title: "【晚餐】頂級螃蟹會席大餐 OR 湯咖哩", desc: "選項 1：預約好的札幌蟹家 (Kaniya Sapporo) 或老字號料亭 杉之目。\n選項 2 (彈性)：Picante 札幌站前店 或 奧芝商店 駅前創成寺湯咖哩。", map: "https://maps.google.com/?q=Kaniya+Sapporo", type: "food" }
+                { time: "09:30–11:30", title: "北海道神宮 參拜", desc: "必吃神宮境內六花亭判官樣紅豆蕎麥餅。", map: "https://maps.google.com/?q=Hokkaido+Shrine", type: "spot" },
+                { time: "14:00–18:00", title: "市區核心購物時間", desc: "狸小路商店街與 PARCO 百貨。", map: "https://maps.google.com/?q=Sapporo+PARCO", type: "spot" }
             ],
             4: [
-                { time: "10:00–10:50", title: "公車往 三井 Outlet Park 札幌北廣島", desc: "從札幌站前搭乘直達公車 (約 50 分鐘)。", transit: "直達巴士", cost: "￥320", type: "transit" },
-                { time: "11:00–16:00", title: "三井 Outlet Park 室內大採購 ✕ 園區午餐", desc: "採購國際精品、戶外品牌與運動服飾，並於 Outlet 內享用午餐。", map: "https://maps.google.com/?q=Mitsui+Outlet+Park+Sapporo+Kitahiroshima", type: "spot" },
-                { time: "16:30", title: "返回札幌站 / 順路逛潮流專賣店", desc: "順路逛 The North Face Sapporo Factory Shop 或 JR Tower Stellar Place。", type: "spot" },
-                { time: "18:30–20:30", title: "【晚餐】質感炭火串燒居酒屋", desc: "1. 炭火鳥燒 蔵鵡 本邸 (備長炭高質感串燒)\n2. 串鳥 札幌站前店 (高 CP 值在地首選)", map: "https://maps.google.com/?q=Kuramu+Sapporo", type: "food" }
+                { time: "10:00–10:50", title: "公車往 三井 Outlet Park 札幌北廣島", desc: "直達公車約 50 分鐘。", transit: "直達巴士", cost: "￥320", type: "transit" },
+                { time: "11:00–16:00", title: "三井 Outlet Park 室內大採購", desc: "採購國際精品與戶外品牌。", map: "https://maps.google.com/?q=Mitsui+Outlet+Park+Sapporo+Kitahiroshima", type: "spot" }
             ],
             5: [
-                { time: "08:00–08:30", title: "辦理退房 ➔ 前往 JR 札幌站", desc: "辦理退房手續，攜帶行李至 JR 札幌站。", type: "transit" },
-                { time: "08:35–09:15", title: "搭乘 JR 快速 Airport 前往新千歲機場", desc: "車程約 37–40 分鐘。最晚 09:30 前抵達報到櫃檯。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
-                { time: "09:25–11:55", title: "機場國內線商圈最後巡禮 ✕ 報到登機", desc: "通關前撥出 20–30 分鐘至巨大的新千歲機場國內線 2F 商圈大補貨 (六花亭、LeTAO、ROYCE' 生巧克力、美瑛選果玉米麵包)。11:55 班機返台。", map: "https://maps.google.com/?q=New+Chitose+Airport", type: "flight" }
+                { time: "08:35–09:15", title: "搭乘 JR 快速 Airport 前往新千歲機場", desc: "車程約 40 分鐘。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
+                { time: "09:25–11:55", title: "機場國內線商圈最後巡禮 ✕ 報到登機", desc: "11:55 班機返台。", map: "https://maps.google.com/?q=New+Chitose+Airport", type: "flight" }
             ]
         };
 
-        // Default Tax Partner Stores
         const defaultTaxData = {
-            "J-TaxRefund": ["唐吉訶德 (DONKI)", "Bic Camera", "大國藥妝", "松本清", "Sun Drug (Sug藥局)"],
-            "Smart Detax": ["BEAMS (百貨專櫃)", "3COINS", "AEON Mall", "阿卡將本舖 (Akachan Honpo)", "PARCO 百貨", "HANDS (東急手創)"],
-            "PIE VAT": ["Mont-bell (全日本130+門市)", "BEAMS (直營/Outlet)", "三井 Outlet Park 全系列", "LaLaport", "東急 Plaza"],
-            "Global Blue": ["UNIQLO", "GU", "The North Face (專賣店/Outlet)", "高島屋", "三越伊勢丹", "大丸松坂屋", "阪急百貨", "國際精品專櫃"]
+            "J-TaxRefund": ["唐吉訶德 (DONKI)", "Bic Camera", "大國藥妝", "松本清", "Sun Drug"],
+            "Smart Detax": ["BEAMS", "3COINS", "AEON Mall", "阿卡將本舖", "PARCO 百貨"],
+            "PIE VAT": ["Mont-bell", "三井 Outlet Park 全系列", "LaLaport", "東急 Plaza"],
+            "Global Blue": ["UNIQLO", "GU", "The North Face", "高島屋", "三越伊勢丹", "大丸"]
         };
 
-        // Initialize LocalStorage arrays with pre-populated Expenses
-        let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || [
-            {
-                id: 1700000000001,
-                title: "機票來回 兩人",
-                curr: "TWD",
-                originalAmount: 30508,
-                jpy: Math.round(30508 / 0.215),
-                twd: 30508,
-                category: "交通",
-                payer: "Ginny",
-                photo: null,
-                date: "2026/11/08"
-            },
-            {
-                id: 1700000000000,
-                title: "飯店費用",
-                curr: "TWD",
-                originalAmount: 11191,
-                jpy: Math.round(11191 / 0.215),
-                twd: 11191,
-                category: "其他",
-                payer: "Ginny",
-                photo: null,
-                date: "2026/11/08"
-            }
+        // 預設花費：絕對永久保留
+        const defaultPresetExpenses = [
+            { id: 1700000000001, title: "機票來回 兩人", curr: "TWD", originalAmount: 30508, jpy: Math.round(30508 / 0.215), twd: 30508, category: "交通", payer: "Ginny", photo: null, date: "2026/11/08" },
+            { id: 1700000000000, title: "飯店費用", curr: "TWD", originalAmount: 11191, jpy: Math.round(11191 / 0.215), twd: 11191, category: "其他", payer: "Ginny", photo: null, date: "2026/11/08" }
         ];
-        let journals = JSON.parse(localStorage.getItem('hkd_journals')) || [];
-        let todos = JSON.parse(localStorage.getItem('hkd_todos')) || [
-            { id: 1, text: "護照 (確認6個月以上有效期)", assignee: "全體", done: true },
-            { id: 2, text: "日本 eSIM / 實體網卡準備", assignee: "Henry", done: true },
-            { id: 3, text: "日幣現金與信用卡準備", assignee: "Ginny", done: false },
-            { id: 4, text: "預約 11/10 札幌蟹家晚餐", assignee: "Ginny", done: false }
-        ];
-        let vouchers = JSON.parse(localStorage.getItem('hkd_vouchers')) || [];
-        let taxCustomStores = JSON.parse(localStorage.getItem('hkd_tax_stores')) || {};
 
-        // ================= APP INITIALIZATION =================
+        let expenses = [];
+        let journals = [];
+        let todos = [];
+        let vouchers = [];
+        let taxCustomStores = {};
+
+        // ================= APP INITIALIZATION & FIREBASE SYNC =================
         window.onload = function() {
             try {
                 applySavedBackground();
                 renderItinerary(1);
-                renderExpenses();
-                renderJournals();
-                renderTodos('all');
                 renderTaxInformation();
             } catch (err) {
-                console.warn("初始化部分模組警告 (已自動修正):", err);
+                console.warn(err);
             }
+            initFirebaseListeners();
         };
 
-        // Safety listeners for online/offline events
-        window.addEventListener('online', () => console.log('網路已連線'));
-        window.addEventListener('offline', () => console.log('離線模式運作中'));
+        function initFirebaseListeners() {
+            const statusBadge = document.getElementById('cloud-status-badge');
+
+            // 1. 監聽記帳資料
+            db.ref('hokkaido_2026/expenses').on('value', (snapshot) => {
+                const val = snapshot.val();
+                if (val) {
+                    expenses = Array.isArray(val) ? val : Object.values(val);
+                } else {
+                    expenses = [...defaultPresetExpenses];
+                    db.ref('hokkaido_2026/expenses').set(expenses);
+                }
+                // 確保預設機票與飯店永遠存在
+                const hasFlight = expenses.some(e => e.id === 1700000000001);
+                const hasHotel = expenses.some(e => e.id === 1700000000000);
+                if (!hasFlight) expenses.unshift(defaultPresetExpenses[0]);
+                if (!hasHotel) expenses.unshift(defaultPresetExpenses[1]);
+
+                renderExpenses();
+                statusBadge.innerText = "⚡ 雲端連線";
+                statusBadge.className = "bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded text-[9px]";
+            }, (error) => {
+                statusBadge.innerText = "💾 離線備份";
+                statusBadge.className = "bg-amber-900/80 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded text-[9px]";
+                expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || defaultPresetExpenses;
+                renderExpenses();
+            });
+
+            // 2. 監聽日誌
+            db.ref('hokkaido_2026/journals').on('value', (snapshot) => {
+                const val = snapshot.val();
+                journals = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
+                renderJournals();
+            });
+
+            // 3. 監聽清單
+            db.ref('hokkaido_2026/todos').on('value', (snapshot) => {
+                const val = snapshot.val();
+                if (val) {
+                    todos = Array.isArray(val) ? val : Object.values(val);
+                } else {
+                    todos = [
+                        { id: 1, text: "護照 (確認6個月以上有效期)", assignee: "全體", done: true },
+                        { id: 2, text: "日本 eSIM / 實體網卡準備", assignee: "Henry", done: true },
+                        { id: 3, text: "日幣現金與信用卡準備", assignee: "Ginny", done: false },
+                        { id: 4, text: "預約 11/10 札幌蟹家晚餐", assignee: "Ginny", done: false }
+                    ];
+                    db.ref('hokkaido_2026/todos').set(todos);
+                }
+                renderTodos('all');
+            });
+
+            // 4. 監聽憑證
+            db.ref('hokkaido_2026/vouchers').on('value', (snapshot) => {
+                const val = snapshot.val();
+                vouchers = val ? (Array.isArray(val) ? val : Object.values(val)) : [];
+                if(isUnlocked) renderVouchers();
+            });
+
+            // 5. 監聽自訂退稅商店
+            db.ref('hokkaido_2026/tax_stores').on('value', (snapshot) => {
+                const val = snapshot.val();
+                taxCustomStores = val || {};
+                renderTaxInformation();
+            });
+        }
 
         // Background Image Management
         function applySavedBackground() {
             const resetBtn = document.getElementById('reset-bg-btn');
             if(savedBgImage) {
                 document.body.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.65)), url('${savedBgImage}')`;
-                document.body.style.backgroundSize = 'cover';
-                document.body.style.backgroundPosition = 'center top';
-                document.body.style.backgroundAttachment = 'fixed';
                 if(resetBtn) resetBtn.classList.remove('hidden');
             } else {
-                document.body.style.backgroundImage = `
-                    linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.65)),
-                    url('./bg.png'),
-                    url('./bg.jpg')`;
-                document.body.style.backgroundSize = 'cover';
-                document.body.style.backgroundPosition = 'center top';
-                document.body.style.backgroundAttachment = 'fixed';
+                document.body.style.backgroundImage = `linear-gradient(rgba(15, 23, 42, 0.45), rgba(15, 23, 42, 0.65)), url('./bg.png'), url('./bg.jpg')`;
                 if(resetBtn) resetBtn.classList.add('hidden');
             }
         }
@@ -813,7 +763,6 @@
             }
         }
 
-        // Day Selector for Itinerary
         function switchDay(dayNum) {
             currentDay = dayNum;
             for(let i=1; i<=5; i++) {
@@ -850,19 +799,11 @@
                         ${item.transit ? `<span class="bg-emerald-950/60 text-emerald-300 border border-emerald-600/40 px-1.5 py-0.5 rounded text-[10px]">預計交通: ${item.transit} (${item.cost || '免費'})</span>` : ''}
                     </div>
                     <div class="font-bold text-white text-sm flex items-center gap-1.5">
-                        <span class="px-1.5 py-0.5 rounded border text-[10px] ${badgeColor}">
-                            <i class="fa-solid ${icon}"></i>
-                        </span>
+                        <span class="px-1.5 py-0.5 rounded border text-[10px] ${badgeColor}"><i class="fa-solid ${icon}"></i></span>
                         ${item.title}
                     </div>
                     <p class="text-gray-200 text-[11px] leading-relaxed whitespace-pre-line">${item.desc}</p>
-                    ${item.map ? `
-                        <div class="pt-1 text-right">
-                            <a href="${item.map}" target="_blank" class="pixel-btn px-2 py-1 text-[10px] text-amber-300 inline-flex items-center gap-1">
-                                <i class="fa-solid fa-map-location-dot"></i> 開啟 Google Maps
-                            </a>
-                        </div>
-                    ` : ''}
+                    ${item.map ? `<div class="pt-1 text-right"><a href="${item.map}" target="_blank" class="pixel-btn px-2 py-1 text-[10px] text-amber-300 inline-flex items-center gap-1"><i class="fa-solid fa-map-location-dot"></i> 開啟 Google Maps</a></div>` : ''}
                 `;
                 container.appendChild(card);
             });
@@ -871,15 +812,13 @@
         function refreshWeatherSimulation() {
             const temps = ["6°C ~ 12°C (陽光普照)", "8°C ~ 14°C (晴時多雲)", "5°C ~ 10°C (微風有雨)"];
             const ropeways = ["🟢 正常營運中", "🟢 正常營運中 (班次密集)", "🟡 強風預警 (建議搭乘前再確認)"];
-            
             document.getElementById('sim-temp').innerText = temps[Math.floor(Math.random() * temps.length)];
             document.getElementById('sim-ropeway').innerText = ropeways[Math.floor(Math.random() * ropeways.length)];
         }
 
-        // ================= BOOKINGS & PIN UNLOCK =================
+        // ================= VOUCHERS / PIN UNLOCK =================
         function unlockVouchers() {
-            const pin = document.getElementById('pin-input').value;
-            if(pin === '2026') {
+            if(document.getElementById('pin-input').value === '2026') {
                 isUnlocked = true;
                 document.getElementById('pin-lock-screen').classList.add('hidden');
                 document.getElementById('voucher-content').classList.remove('hidden');
@@ -887,24 +826,23 @@
                 document.getElementById('pin-status-tag').className = "text-[10px] bg-emerald-900/80 text-emerald-200 px-2 py-0.5 rounded";
                 renderVouchers();
             } else {
-                alert("PIN 碼錯誤！(提示：YEAR = 2026)");
+                alert("PIN 碼錯誤！(提示：2026)");
             }
         }
 
         function uploadVoucher() {
             const fileInput = document.getElementById('voucher-file');
             const titleInput = document.getElementById('voucher-title');
-            if(!fileInput.files[0] || !titleInput.value) {
-                alert("請選擇照片並填寫憑證名稱");
+            if(!fileInput.files[0]) {
+                alert("請選擇照片");
                 return;
             }
-
+            const defaultTitle = "憑證 " + new Date().toLocaleDateString();
             compressAndBase64(fileInput.files[0], 800, 0.6, (base64) => {
-                vouchers.push({ title: titleInput.value, image: base64, date: new Date().toLocaleDateString() });
-                localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
+                vouchers.push({ title: titleInput.value.trim() || defaultTitle, image: base64, date: new Date().toLocaleDateString() });
+                db.ref('hokkaido_2026/vouchers').set(vouchers);
                 titleInput.value = '';
                 fileInput.value = '';
-                renderVouchers();
             });
         }
 
@@ -920,10 +858,7 @@
                 item.className = "bg-black/60 p-3 rounded border border-gray-700 text-xs space-y-2";
                 item.innerHTML = `
                     <div class="flex justify-between items-center border-b border-gray-700 pb-1.5">
-                        <div>
-                            <span class="font-bold text-amber-300 text-sm">${v.title}</span>
-                            <span class="text-[10px] text-gray-400 block">${v.date}</span>
-                        </div>
+                        <div><span class="font-bold text-amber-300 text-sm">${v.title}</span><span class="text-[10px] text-gray-400 block">${v.date}</span></div>
                         <button onclick="deleteVoucher(${index})" class="text-red-400 hover:text-red-300 text-[11px]"><i class="fa-solid fa-trash mr-1"></i>刪除</button>
                     </div>
                     ${v.image ? `<img src="${v.image}" class="w-full rounded border border-gray-700 object-cover max-h-52 mt-1" onclick="viewImage('${v.image}')">` : ''}
@@ -934,8 +869,7 @@
 
         function deleteVoucher(index) {
             vouchers.splice(index, 1);
-            localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
-            renderVouchers();
+            db.ref('hokkaido_2026/vouchers').set(vouchers);
         }
 
         // ================= WALLET & EXPENSE LOGIC =================
@@ -955,62 +889,42 @@
         }
 
         function evaluateExpression() {
-            const expr = document.getElementById('calc-expression').value;
             try {
-                const result = Function(`'use strict'; return (${expr})`)();
+                const result = Function(`'use strict'; return (${document.getElementById('calc-expression').value})`)();
                 if(!isNaN(result)) {
                     document.getElementById('expense-amount').value = Math.round(result);
-                    onCurrencyChange();
                     calculateCurrency();
                 }
-            } catch(e) {
-                alert("算式格式錯誤");
-            }
+            } catch(e) { alert("算式格式錯誤"); }
         }
 
-        function onCurrencyChange() {
-            calculateCurrency();
-        }
+        function onCurrencyChange() { calculateCurrency(); }
 
         function calculateCurrency() {
             const rate = parseFloat(document.getElementById('exchange-rate').value) || 0.215;
             const curr = document.getElementById('expense-currency').value;
             const amountInput = parseFloat(document.getElementById('expense-amount').value) || 0;
-
-            let valJpy = 0, valTwd = 0;
-            if(curr === 'JPY') {
-                valJpy = amountInput;
-                valTwd = Math.round(valJpy * rate);
-            } else {
-                valTwd = amountInput;
-                valJpy = Math.round(valTwd / rate);
-            }
-
+            let valJpy = curr === 'JPY' ? amountInput : Math.round(amountInput / rate);
+            let valTwd = curr === 'TWD' ? amountInput : Math.round(valJpy * rate);
             document.getElementById('calc-result-jpy').innerText = `￥ ${valJpy.toLocaleString()} (約 NT$ ${valTwd.toLocaleString()})`;
         }
 
         function addExpenseItem() {
-            const title = document.getElementById('expense-title').value;
             const amount = parseFloat(document.getElementById('expense-amount').value);
-            const curr = document.getElementById('expense-currency').value;
+            if(isNaN(amount) || amount <= 0) {
+                alert("請填寫正確金額！");
+                return;
+            }
+            const titleInput = document.getElementById('expense-title').value.trim();
             const category = document.getElementById('expense-category').value;
+            const title = titleInput || (`未命名 ${category}`);
+            const curr = document.getElementById('expense-currency').value;
             const payer = document.getElementById('expense-payer').value;
             const rate = parseFloat(document.getElementById('exchange-rate').value) || 0.215;
             const photoInput = document.getElementById('expense-photo');
 
-            if(!title || isNaN(amount) || amount <= 0) {
-                alert("請填寫品項名稱與正確金額");
-                return;
-            }
-
-            let jpy = 0, twd = 0;
-            if(curr === 'JPY') {
-                jpy = amount;
-                twd = Math.round(jpy * rate);
-            } else {
-                twd = amount;
-                jpy = Math.round(twd / rate);
-            }
+            let jpy = curr === 'JPY' ? amount : Math.round(amount / rate);
+            let twd = curr === 'TWD' ? amount : Math.round(jpy * rate);
 
             const saveItem = (photoBase64 = null) => {
                 const item = {
@@ -1026,13 +940,12 @@
                     date: new Date().toLocaleDateString()
                 };
                 expenses.unshift(item);
-                localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
+                db.ref('hokkaido_2026/expenses').set(expenses);
 
                 document.getElementById('expense-title').value = '';
                 document.getElementById('expense-amount').value = '';
                 document.getElementById('calc-expression').value = '';
                 document.getElementById('expense-photo').value = '';
-                renderExpenses();
             };
 
             if(photoInput.files[0]) {
@@ -1045,9 +958,7 @@
         function renderExpenses() {
             const container = document.getElementById('expense-history-list');
             container.innerHTML = '';
-
-            let totalJpy = 0;
-            let totalTwd = 0;
+            let totalJpy = 0, totalTwd = 0;
 
             expenses.forEach((item, index) => {
                 totalJpy += item.jpy;
@@ -1061,9 +972,7 @@
                             <span class="text-amber-400">[${item.category}]</span> ${item.title}
                             <span class="text-[9px] bg-slate-800 text-gray-300 px-1 rounded">${item.payer}付</span>
                         </div>
-                        <div class="text-[10px] text-gray-400">
-                            ${item.date} • ${item.curr === 'JPY' ? `￥${item.originalAmount}` : `NT$${item.originalAmount}`}
-                        </div>
+                        <div class="text-[10px] text-gray-400">${item.date} • ${item.curr === 'JPY' ? `￥${item.originalAmount}` : `NT$${item.originalAmount}`}</div>
                     </div>
                     <div class="text-right flex items-center gap-2">
                         <div>
@@ -1083,14 +992,12 @@
 
         function deleteExpense(index) {
             expenses.splice(index, 1);
-            localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
-            renderExpenses();
+            db.ref('hokkaido_2026/expenses').set(expenses);
         }
 
         function renderCategorySummary() {
             const container = document.getElementById('category-summary-list');
             container.innerHTML = '';
-
             const categories = ["餐飲", "交通", "購物", "門票", "其他"];
             const summary = {};
             categories.forEach(c => summary[c] = { twd: 0, jpy: 0, count: 0 });
@@ -1107,14 +1014,8 @@
                 const card = document.createElement('div');
                 card.className = "bg-black/60 p-3 rounded border border-gray-700 text-xs flex justify-between items-center";
                 card.innerHTML = `
-                    <div>
-                        <span class="font-bold text-amber-300 text-sm">${cat}</span>
-                        <span class="text-[10px] text-gray-400 block">${data.count} 筆消費紀錄</span>
-                    </div>
-                    <div class="text-right">
-                        <div class="font-bold text-emerald-400 text-sm">NT$ ${data.twd.toLocaleString()}</div>
-                        <div class="text-[10px] text-gray-400">￥ ${data.jpy.toLocaleString()}</div>
-                    </div>
+                    <div><span class="font-bold text-amber-300 text-sm">${cat}</span><span class="text-[10px] text-gray-400 block">${data.count} 筆消費紀錄</span></div>
+                    <div class="text-right"><div class="font-bold text-emerald-400 text-sm">NT$ ${data.twd.toLocaleString()}</div><div class="text-[10px] text-gray-400">￥ ${data.jpy.toLocaleString()}</div></div>
                 `;
                 container.appendChild(card);
             });
@@ -1122,32 +1023,27 @@
 
         // ================= JOURNAL LOGIC =================
         function addJournalPost() {
-            const title = document.getElementById('journal-title').value;
-            const text = document.getElementById('journal-text').value;
+            const titleInput = document.getElementById('journal-title').value.trim();
+            const text = document.getElementById('journal-text').value.trim();
             const author = document.getElementById('journal-author').value;
             const fileInput = document.getElementById('journal-image');
 
-            if(!title || !text) {
-                alert("請填寫標題與心得！");
-                return;
-            }
-
+            const title = titleInput || "北海道冒險日常";
             const savePost = (imgBase64 = null) => {
                 const post = {
                     id: Date.now(),
                     title,
-                    text,
+                    text: text || "這是一刻值得留念的北海道回憶 ✨",
                     author,
                     image: imgBase64,
                     time: new Date().toLocaleString('zh-TW', { hour12: false })
                 };
                 journals.unshift(post);
-                localStorage.setItem('hkd_journals', JSON.stringify(journals));
+                db.ref('hokkaido_2026/journals').set(journals);
 
                 document.getElementById('journal-title').value = '';
                 document.getElementById('journal-text').value = '';
                 document.getElementById('journal-image').value = '';
-                renderJournals();
             };
 
             if(fileInput.files[0]) {
@@ -1160,26 +1056,19 @@
         function renderJournals() {
             const container = document.getElementById('journal-feed');
             container.innerHTML = '';
-
             if(journals.length === 0) {
                 container.innerHTML = `<div class="pixel-box p-4 text-center text-xs text-gray-400">尚未發表任何冒險動態，快來分享第一張照片吧！</div>`;
                 return;
             }
-
             journals.forEach((post, index) => {
                 const card = document.createElement('div');
                 card.className = "pixel-box p-3 bg-slate-900/90 space-y-2 text-xs";
                 card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-gray-700 pb-1.5">
-                        <span class="font-bold text-amber-300">${post.author}</span>
-                        <span class="text-[10px] text-gray-400">${post.time}</span>
-                    </div>
+                    <div class="flex justify-between items-center border-b border-gray-700 pb-1.5"><span class="font-bold text-amber-300">${post.author}</span><span class="text-[10px] text-gray-400">${post.time}</span></div>
                     <div class="font-bold text-sm text-white">${post.title}</div>
                     <p class="text-gray-300 leading-relaxed">${post.text}</p>
                     ${post.image ? `<img src="${post.image}" class="w-full rounded border border-gray-700 object-cover max-h-60 mt-2">` : ''}
-                    <div class="text-right pt-1">
-                        <button onclick="deleteJournal(${index})" class="text-red-400 text-[10px] hover:underline">刪除日誌</button>
-                    </div>
+                    <div class="text-right pt-1"><button onclick="deleteJournal(${index})" class="text-red-400 text-[10px] hover:underline">刪除日誌</button></div>
                 `;
                 container.appendChild(card);
             });
@@ -1187,43 +1076,35 @@
 
         function deleteJournal(index) {
             journals.splice(index, 1);
-            localStorage.setItem('hkd_journals', JSON.stringify(journals));
-            renderJournals();
+            db.ref('hokkaido_2026/journals').set(journals);
         }
 
         // ================= TODOS / LISTS LOGIC =================
         function addTodoItem() {
-            const text = document.getElementById('new-todo-text').value;
+            const text = document.getElementById('new-todo-text').value.trim();
             const assignee = document.getElementById('new-todo-assignee').value;
             if(!text) return;
-
-            const newTodo = { id: Date.now(), text, assignee, done: false };
-            todos.push(newTodo);
-            localStorage.setItem('hkd_todos', JSON.stringify(todos));
-
+            todos.push({ id: Date.now(), text, assignee, done: false });
+            db.ref('hokkaido_2026/todos').set(todos);
             document.getElementById('new-todo-text').value = '';
-            renderTodos('all');
         }
 
         function toggleTodo(id) {
             const item = todos.find(t => t.id === id);
             if(item) {
                 item.done = !item.done;
-                localStorage.setItem('hkd_todos', JSON.stringify(todos));
-                renderTodos('all');
+                db.ref('hokkaido_2026/todos').set(todos);
             }
         }
 
         function deleteTodo(id) {
             todos = todos.filter(t => t.id !== id);
-            localStorage.setItem('hkd_todos', JSON.stringify(todos));
-            renderTodos('all');
+            db.ref('hokkaido_2026/todos').set(todos);
         }
 
         function renderTodos(filter) {
             const container = document.getElementById('todo-list-container');
             container.innerHTML = '';
-
             const filtered = todos.filter(t => filter === 'all' || t.assignee === filter || t.assignee === '全體');
 
             filtered.forEach(t => {
@@ -1245,7 +1126,6 @@
         function renderTaxInformation() {
             const container = document.getElementById('tax-companies-container');
             container.innerHTML = '';
-
             const companies = ["J-TaxRefund", "Smart Detax", "PIE VAT", "Global Blue"];
 
             companies.forEach(comp => {
@@ -1256,43 +1136,26 @@
                 const card = document.createElement('div');
                 card.className = "bg-black/60 p-3 rounded border border-gray-700 text-xs space-y-2";
                 card.innerHTML = `
-                    <div class="flex justify-between items-center border-b border-gray-700 pb-1">
-                        <span class="font-bold text-amber-400 text-sm">📱 ${comp}</span>
-                        <span class="text-[10px] text-gray-400">${allStores.length} 間配合店家</span>
-                    </div>
-                    <div class="flex flex-wrap gap-1.5 pt-1">
-                        ${allStores.map(store => `
-                            <span class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-gray-200 text-[11px]">
-                                ${store}
-                            </span>
-                        `).join('')}
-                    </div>
+                    <div class="flex justify-between items-center border-b border-gray-700 pb-1"><span class="font-bold text-amber-400 text-sm">📱 ${comp}</span><span class="text-[10px] text-gray-400">${allStores.length} 間配合店家</span></div>
+                    <div class="flex flex-wrap gap-1.5 pt-1">${allStores.map(store => `<span class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-gray-200 text-[11px]">${store}</span>`).join('')}</div>
                 `;
                 container.appendChild(card);
             });
         }
 
         function toggleTaxAddModal() {
-            const modal = document.getElementById('tax-add-modal');
-            modal.classList.toggle('hidden');
+            document.getElementById('tax-add-modal').classList.toggle('hidden');
         }
 
         function saveCustomTaxStore() {
             const app = document.getElementById('modal-tax-app').value;
-            const name = document.getElementById('modal-store-name').value;
-
-            if(!name) {
-                alert("請輸入店家名稱");
-                return;
-            }
-
+            const name = document.getElementById('modal-store-name').value.trim();
+            if(!name) return alert("請輸入店家名稱");
             if(!taxCustomStores[app]) taxCustomStores[app] = [];
             taxCustomStores[app].push(name);
-
-            localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
+            db.ref('hokkaido_2026/tax_stores').set(taxCustomStores);
             document.getElementById('modal-store-name').value = '';
             toggleTaxAddModal();
-            renderTaxInformation();
         }
 
         // Helper Image Compression Utility
@@ -1304,21 +1167,16 @@
                 img.src = e.target.result;
                 img.onload = function() {
                     const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
+                    let width = img.width, height = img.height;
                     if (width > maxWidth) {
                         height = Math.round((height * maxWidth) / width);
                         width = maxWidth;
                     }
-
                     canvas.width = width;
                     canvas.height = height;
-
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    const base64 = canvas.toDataURL('image/jpeg', quality);
-                    callback(base64);
+                    callback(canvas.toDataURL('image/jpeg', quality));
                 };
             };
         }
