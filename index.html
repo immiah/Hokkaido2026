@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hokkaido - 自由的感覺 (Minecraft Dungeons Style)</title>
 
-    <!-- iOS 專用 Apple Touch Icon 語法（標準規格優化） -->
+    <!-- iOS 專用 Apple Touch Icon 語法 -->
     <link rel="apple-touch-icon" sizes="180x180" href="./icon.png">
     <link rel="apple-touch-icon text/x-component" href="./icon.png">
     <link rel="apple-touch-icon-precomposed" href="./icon.png">
@@ -60,7 +60,7 @@
             font-family: 'VT323', monospace;
         }
 
-        /* Ultra High Transparency Glassmorphism Pixel Box for Max Background Visibility */
+        /* Ultra High Transparency Glassmorphism Pixel Box */
         .pixel-box {
             background-color: rgba(15, 23, 42, 0.25);
             backdrop-filter: blur(6px);
@@ -182,7 +182,7 @@
                 <button onclick="switchDay(5)" id="day-btn-5" class="pixel-btn px-3 py-2 text-xs font-bold whitespace-nowrap flex-1 text-center">Day 5<br><span class="text-[10px] text-gray-400">11/12(四)</span></button>
             </div>
 
-            <!-- Special Weather & Ropeway Widget (Displayed on Day 1) -->
+            <!-- Special Weather & Ropeway Widget (Displayed on Day 3 / Day 1) -->
             <div id="day1-ropeway-widget" class="pixel-box-gold p-3 rounded">
                 <div class="flex justify-between items-center mb-2">
                     <span class="pixel-font text-xs text-amber-400 flex items-center gap-1">
@@ -271,13 +271,13 @@
                 </div>
             </div>
 
-            <!-- Hotel Booking Section -->
+            <!-- Hotel Booking Section (Mitsui Garden Hotel Sapporo West) -->
             <div class="pixel-box p-4 bg-slate-900/25">
                 <h3 class="pixel-font text-amber-400 text-xs mb-3 flex items-center gap-2">
                     <i class="fa-solid fa-hotel"></i> 住宿資訊 (11/08 - 11/12 4晚)
                 </h3>
                 <div class="space-y-2 text-xs">
-                    <div class="font-bold text-sm text-white">Mitsui Garden Hotel Sapporo West</div>
+                    <div class="font-bold text-sm text-white">三井ガーデンホテル札幌ウエスト (Mitsui Garden Hotel Sapporo West)</div>
                     <p class="text-gray-200"><i class="fa-solid fa-location-dot text-rose-400 mr-1"></i> 北海道札幌市中央區北5条西6-2-4</p>
                     <div class="grid grid-cols-2 gap-2 bg-black/20 p-2 rounded text-gray-300 mt-2 border border-white/10">
                         <div>Check-in: <span class="text-amber-300">15:00 後</span></div>
@@ -314,7 +314,7 @@
                 <div id="voucher-content" class="hidden space-y-3 pt-2">
                     <div class="text-xs text-emerald-400 mb-2">✓ 寶箱已解鎖！以下為上傳的票券憑證：</div>
                     <div id="voucher-list" class="space-y-3">
-                        <!-- Voucher Items with inline photo preview -->
+                        <!-- Voucher Items -->
                     </div>
                     
                     <div class="border-t border-gray-700 pt-3">
@@ -660,44 +660,44 @@
         let isUnlocked = false;
         let savedBgImage = localStorage.getItem('hkd_bg_image') || null;
 
-        // Default Itinerary Data with Transit Times and Estimated Costs
+        // Default Itinerary Data directly from PDF (札幌 5 天 4 夜 慢旅手冊)
         const itineraryData = {
             1: [
-                { time: "10:55", title: "班機抵達新千歲機場 (CTS)", desc: "下機、通關與提行李約需 40–50 分鐘。", type: "flight" },
-                { time: "11:40–12:20", title: "搭乘 JR 快速 Airport 直達 JR 札幌站", desc: "車程約 40 分鐘。每 12 分鐘一班。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
-                { time: "12:30–14:00", title: "飯店寄放行李 ✕ 午餐 (札幌站)", desc: "一幻蝦拉麵 / 一夜干海鮮丼Dekitateya / 奧芝商店 湯咖哩", map: "https://maps.google.com/?q=Sapporo+Station", type: "food" },
-                { time: "14:30–17:00", title: "地下街/市區散步 (備案 weather check)", desc: "Chi-Ka-Ho 直通大通商圈 / Patagonia / mont-bell / Stellar Place 香水 / 甜點泡芙", map: "https://maps.google.com/?q=Chi-Ka-Ho+Sapporo", type: "spot" },
-                { time: "17:30–19:30", title: "晚餐：成吉思汗烤羊肉 / 湯咖哩", desc: "達摩 (だるま) 薄野分店 (建議17:00前往) 或 GARAKU / Suage+", map: "https://maps.google.com/?q=Daruma+Susukino", type: "food" },
-                { time: "20:00–21:30", title: "狸小路散步 ✕ 夜間聖代 (夜パフェ)", desc: "Parfaiteria PaL 或 Initial 聖代 / 宵夜 Hirihiri 湯咖哩", map: "https://maps.google.com/?q=Tanukikoji+Shopping+Street", type: "spot" }
+                { time: "10:55", title: "抵達新千歲機場 (CTS)", desc: "下機、通關與提行李約需 40–50 分鐘。", type: "flight" },
+                { time: "11:40–12:20", title: "搭乘 JR 快速 Airport 直達 JR 札幌站", desc: "車程約 40 分鐘。每 12 分鐘一班，錯過順延下一班即可。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
+                { time: "12:30–14:00", title: "飯店寄放行李 ✕ 午餐 (札幌站周邊)", desc: "1. 奧芝商店 駅前創成寺(招牌濃郁蝦湯底湯咖哩)\n2. 一幻蝦拉麵 (札幌站地下街分店)\n3. 一夜干海鮮丼Dekitateya 鐘樓店 or stellar place 6F也有。", map: "https://maps.google.com/?q=Sapporo+Station", type: "food" },
+                { time: "14:30–17:00", title: "大通公園散步 ✕ 戶外品牌購物 ✕ 甜點巡禮", desc: "1. 走 Chi-Ka-Ho 地下步行空間直通大通商圈\n2. Patagonia 札幌大通旗艦店 & mont-bell 赤れんが Terrace 店/PILLARS店\n3. 香水：Stellar Place (SHIRO, Aux Paradis, SHOLAYERED)\n4. 必吃甜點：KINOTOYA Cafe Odori Bisse (極濃牛奶霜淇淋)、北菓樓 札幌本館 (夢不思議大泡芙)", map: "https://maps.google.com/?q=Chi-Ka-Ho+Sapporo", type: "spot" },
+                { time: "17:30–19:30", title: "晚餐：成吉思汗烤羊肉 / 燒肉 / 湯咖哩", desc: "1. 達摩 (だるま) 薄野各分店 (建議 17:00 前候位)\n2. Yakiniku Jingisukan Horumon Fudo Susukino\n3. 肉處ぎんべこや (白老和牛燒肉與丼飯)\n4. 湯咖哩備案：GARAKU、Suage+、Picante 札幌站前店、SAMA", map: "https://maps.google.com/?q=Daruma+Susukino", type: "food" },
+                { time: "20:00–21:30", title: "狸小路散步 ✕ 夜間聖代 (夜パフェ)", desc: "1. 夜帕フェ體驗：Parfaiteria PaL 或 Initial (初期)\n2. 宵夜備案：Hirihiri 2號店 (湯咖哩)", map: "https://maps.google.com/?q=Tanukikoji+Shopping+Street", type: "spot" }
             ],
             2: [
-                { time: "09:30–10:10", title: "搭乘 JR 快速列車往 小樽站", desc: "車程約 40 分鐘。建議坐右側欣賞石狩灣海景。", transit: "JR 快速 Express", cost: "￥750", type: "transit" },
-                { time: "10:30–12:00", title: "午餐：小樽三角市場海鮮丼", desc: "滝波食堂 / 武田鮮魚店 / 二角市場丼兵衛 / 若鶏時代なると", map: "https://maps.google.com/?q=Otaru+Sankaku+Market", type: "food" },
-                { time: "12:30–16:30", title: "小樽運河與堺町通散步", desc: "運河 ➔ 堺町通 (北一硝子、音樂盒堂) ➔ LeTAO雙層起司 / 六花亭 / 北菓樓", map: "https://maps.google.com/?q=Otaru+Canal", type: "spot" },
-                { time: "17:00–18:30", title: "晚餐：Yabuhan Soba 鴨肉蕎麥麵", desc: "老字號 Yabuhan Soba 或 壽司屋通海鮮壽司", map: "https://maps.google.com/?q=Yabuhan+Soba+Otaru", type: "food" },
-                { time: "19:00–19:40", title: "搭乘 JR 從南小樽/小樽站返回札幌", desc: "車程約 40 分鐘，輕鬆返回札幌飯店。", transit: "JR 快速", cost: "￥750", type: "transit" }
+                { time: "09:30–10:10", title: "搭乘 JR 快速列車前往 JR 小樽站", desc: "車程約 40 分鐘。建議坐右側車窗欣賞石狩灣海景 (可提前劃指定席)。", transit: "JR 快速 Express", cost: "￥750", type: "transit" },
+                { time: "10:30–12:00", title: "【午餐】小樽三角市場或在地美食", desc: "1. 三角市場海鮮丼：滝波食堂、武田鮮魚店、三角亭\n2. 二角市場：丼兵衛小樽運河店\n3. 熟食備案：若雞時代なると本店 (必吃香酥炸半雞定食)", map: "https://maps.google.com/?q=Otaru+Sankaku+Market", type: "food" },
+                { time: "12:30–16:30", title: "小樽運河與堺町通商店街散步", desc: "順向路線：三角市場 ➔ 小樽運河 ➔ 堺町通 (北一硝子、小樽音樂盒堂) ➔ 最終步行至 JR 南小樽站搭車返回。\n甜點巡禮：LeTAO 本店 (雙層起司蛋糕)、六花亭 小樽運河店、北菓樓 小樽本館。", map: "https://maps.google.com/?q=Otaru+Canal", type: "spot" },
+                { time: "17:00–18:30", title: "【晚餐】小樽在地名店", desc: "老字號 Yabuhan Soba (薮半) 鴨肉高湯蕎麥麵，或壽司屋通 (Sushiya-dori) 海鮮壽司。", map: "https://maps.google.com/?q=Yabuhan+Soba+Otaru", type: "food" },
+                { time: "19:00–19:40", title: "搭乘 JR (南小樽站或小樽站) 返回札幌", desc: "輕鬆搭車返回札幌飯店，或返回札幌吃晚餐/宵夜。", transit: "JR 快速", cost: "￥750", type: "transit" }
             ],
             3: [
-                { time: "09:30–11:30", title: "北海道神宮 參拜", desc: "地鐵東西線至圓山公園站。必吃六花亭現煎「判官樣」紅豆餅。", transit: "地鐵東西線", cost: "￥210", map: "https://maps.google.com/?q=Hokkaido+Shrine", type: "spot" },
-                { time: "12:00–13:30", title: "午餐：和牛燒肉或 Toriton 壽司", desc: "肉處ぎんべこや (白老和牛) 或 Toriton 迴轉壽司", map: "https://maps.google.com/?q=Toriton+Sushi+Sapporo", type: "food" },
-                { time: "14:00–18:00", title: "市區核心購物時間", desc: "狸小路藥妝 / PARCO 潮流服飾 / S.O.S fp 銀飾 (戰利品先拿回飯店)", map: "https://maps.google.com/?q=Sapporo+PARCO", type: "spot" },
-                { time: "16:45–19:00", title: "重頭戲：藻岩山纜車賞夜景 (方案B)", desc: "搭路面電車至纜車入口站轉接駁車。搭纜車+莫ーリス號登頂。", transit: "路面電車 + 纜車", cost: "￥2,100", map: "https://maps.google.com/?q=Mt.+Moiwa+Ropeway", type: "spot" },
-                { time: "19:30–21:30", title: "晚餐：頂級螃蟹會席大餐 / 湯咖哩", desc: "札幌蟹家 (Kaniya) / 料亭 杉之目 或 Picante 湯咖哩", map: "https://maps.google.com/?q=Kaniya+Sapporo", type: "food" }
+                { time: "09:30–11:30", title: "北海道神宮 參拜", desc: "搭地鐵東西線至「圓山公園站」。必吃神宮境內六花亭神宮茶屋限定現煎「判官樣」紅豆蕎麥餅。", transit: "地鐵東西線", cost: "￥210", map: "https://maps.google.com/?q=Hokkaido+Shrine", type: "spot" },
+                { time: "12:00–13:30", title: "【午餐】和牛燒肉或壽司", desc: "Yakiniku Tokuju K-Place (午餐高CP) 或 肉處ぎんべこや (白老和牛燒肉) 或 Toriton 迴轉壽司。", map: "https://maps.google.com/?q=Toriton+Sushi+Sapporo", type: "food" },
+                { time: "14:00–18:00", title: "【方案A/B】市區核心購物時間", desc: "1. 狸小路商店街：採購藥妝、伴手禮、業務超市狸小路店。\n2. Sapporo PARCO：逛日系潮流服飾與銀飾選品 (S.O.S fp, Flags Sapporo 代理 First Arrow's 銀飾).\n貼心提醒：買完戰利品可先拿回飯店寄放。", map: "https://maps.google.com/?q=Sapporo+PARCO", type: "spot" },
+                { time: "15:00–19:00", title: "【方案B】藻岩山纜車賞夜景 (偏冷風大)", desc: "15:15 搭乘札幌市電至「纜車入口站」➔ 15:35 轉免費接駁巴士至山麓站 ➔ 16:00 雙段纜車登頂 (大型纜車 + 莫ーリス號)。", transit: "市電 + 接駁車 + 纜車", cost: "￥2,100", map: "https://maps.google.com/?q=Mt.+Moiwa+Ropeway", type: "spot" },
+                { time: "18:30–21:30", title: "【晚餐】頂級螃蟹會席大餐 OR 湯咖哩", desc: "選項 1：預約好的札幌蟹家 (Kaniya Sapporo) 或老字號料亭 杉之目。\n選項 2 (彈性)：Picante 札幌站前店 或 奧芝商店 駅前創成寺湯咖哩。", map: "https://maps.google.com/?q=Kaniya+Sapporo", type: "food" }
             ],
             4: [
-                { time: "10:00–10:50", title: "公車往 三井 Outlet Park 札幌北廣島", desc: "札幌站前搭乘直達公車 (約 50 分鐘)。", transit: "直達巴士", cost: "￥320", type: "transit" },
-                { time: "11:00–16:00", title: "三井 Outlet 大採購 ✕ 園區午餐", desc: "國際精品、戶外運動服飾採購。", map: "https://maps.google.com/?q=Mitsui+Outlet+Park+Sapporo+Kitahiroshima", type: "spot" },
-                { time: "16:30", title: "返回札幌站 / 逛 The North Face", desc: "順路逛 TNF Sapporo Factory Shop 或 JR Tower Stellar Place。", type: "spot" },
-                { time: "18:30–20:30", title: "晚餐：炭火串燒居酒屋", desc: "炭火鳥燒 蔵鵡 本邸 或 高CP值 串鳥 札幌站前店", map: "https://maps.google.com/?q=Kuramu+Sapporo", type: "food" }
+                { time: "10:00–10:50", title: "公車往 三井 Outlet Park 札幌北廣島", desc: "從札幌站前搭乘直達公車 (約 50 分鐘)。", transit: "直達巴士", cost: "￥320", type: "transit" },
+                { time: "11:00–16:00", title: "三井 Outlet Park 室內大採購 ✕ 園區午餐", desc: "採購國際精品、戶外品牌與運動服飾，並於 Outlet 內享用午餐。", map: "https://maps.google.com/?q=Mitsui+Outlet+Park+Sapporo+Kitahiroshima", type: "spot" },
+                { time: "16:30", title: "返回札幌站 / 順路逛潮流專賣店", desc: "順路逛 The North Face Sapporo Factory Shop 或 JR Tower Stellar Place。", type: "spot" },
+                { time: "18:30–20:30", title: "【晚餐】質感炭火串燒居酒屋", desc: "1. 炭火鳥燒 蔵鵡 本邸 (備長炭高質感串燒)\n2. 串鳥 札幌站前店 (高 CP 值在地首選)", map: "https://maps.google.com/?q=Kuramu+Sapporo", type: "food" }
             ],
             5: [
-                { time: "08:00–08:30", title: "辦理退房 ➔ 札幌站", desc: "攜帶行李前往 JR 札幌站。", type: "transit" },
-                { time: "08:35–09:15", title: "搭乘 JR 快速 Airport 至新千歲機場", desc: "車程約 37–40 分鐘。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
-                { time: "09:25–11:55", title: "機場國內線商圈大補貨 ✕ 報到登機", desc: "通關前 20-30 分鐘採購六花亭、LeTAO、ROYCE'、美瑛選果玉米麵包。11:55 班機返台。", map: "https://maps.google.com/?q=New+Chitose+Airport", type: "flight" }
+                { time: "08:00–08:30", title: "辦理退房 ➔ 前往 JR 札幌站", desc: "辦理退房手續，攜帶行李至 JR 札幌站。", type: "transit" },
+                { time: "08:35–09:15", title: "搭乘 JR 快速 Airport 前往新千歲機場", desc: "車程約 37–40 分鐘。最晚 09:30 前抵達報到櫃檯。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
+                { time: "09:25–11:55", title: "機場國內線商圈最後巡禮 ✕ 報到登機", desc: "通關前撥出 20–30 分鐘至巨大的新千歲機場國內線 2F 商圈大補貨 (六花亭、LeTAO、ROYCE' 生巧克力、美瑛選果玉米麵包)。11:55 班機返台。", map: "https://maps.google.com/?q=New+Chitose+Airport", type: "flight" }
             ]
         };
 
-        // Default Tax Partner Stores structured by the 4 required Companies with specific requested brands
+        // Default Tax Partner Stores
         const defaultTaxData = {
             "J-TaxRefund": ["唐吉訶德 (DONKI)", "Bic Camera", "大國藥妝", "松本清", "Sun Drug (Sug藥局)"],
             "Smart Detax": ["BEAMS (百貨專櫃)", "3COINS", "AEON Mall", "阿卡將本舖 (Akachan Honpo)", "PARCO 百貨", "HANDS (東急手創)"],
@@ -705,8 +705,20 @@
             "Global Blue": ["UNIQLO", "GU", "The North Face (專賣店/Outlet)", "高島屋", "三越伊勢丹", "大丸松坂屋", "阪急百貨", "國際精品專櫃"]
         };
 
-        // Initialize LocalStorage arrays
+        // Initialize LocalStorage arrays with pre-populated Expenses
         let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || [
+            {
+                id: 1700000000001,
+                title: "機票來回 兩人",
+                curr: "TWD",
+                originalAmount: 30508,
+                jpy: Math.round(30508 / 0.215),
+                twd: 30508,
+                category: "交通",
+                payer: "Ginny",
+                photo: null,
+                date: "2026/11/08"
+            },
             {
                 id: 1700000000000,
                 title: "飯店費用",
@@ -814,7 +826,7 @@
                     btn.classList.add('pixel-btn');
                 }
             }
-            document.getElementById('day1-ropeway-widget').style.display = (dayNum === 1) ? 'block' : 'none';
+            document.getElementById('day1-ropeway-widget').style.display = (dayNum === 1 || dayNum === 3) ? 'block' : 'none';
             renderItinerary(dayNum);
         }
 
@@ -843,7 +855,7 @@
                         </span>
                         ${item.title}
                     </div>
-                    <p class="text-gray-200 text-[11px] leading-relaxed">${item.desc}</p>
+                    <p class="text-gray-200 text-[11px] leading-relaxed whitespace-pre-line">${item.desc}</p>
                     ${item.map ? `
                         <div class="pt-1 text-right">
                             <a href="${item.map}" target="_blank" class="pixel-btn px-2 py-1 text-[10px] text-amber-300 inline-flex items-center gap-1">
@@ -945,7 +957,6 @@
         function evaluateExpression() {
             const expr = document.getElementById('calc-expression').value;
             try {
-                // Safe basic math evaluator
                 const result = Function(`'use strict'; return (${expr})`)();
                 if(!isNaN(result)) {
                     document.getElementById('expense-amount').value = Math.round(result);
@@ -962,7 +973,6 @@
         }
 
         function calculateCurrency() {
-            const expr = document.getElementById('calc-expression').value;
             const rate = parseFloat(document.getElementById('exchange-rate').value) || 0.215;
             const curr = document.getElementById('expense-currency').value;
             const amountInput = parseFloat(document.getElementById('expense-amount').value) || 0;
@@ -1285,7 +1295,7 @@
             renderTaxInformation();
         }
 
-        // Helper Image Compression Utility (Canvas Base64)
+        // Helper Image Compression Utility
         function compressAndBase64(file, maxWidth, quality, callback) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
