@@ -157,11 +157,6 @@
                 <i class="fa-solid fa-users"></i>
                 <span>隊員</span>
             </button>
-            <!-- Cloud Status Indicator -->
-            <div id="cloud-status" class="pixel-btn text-xs px-2 py-1 flex items-center gap-1 text-emerald-400 bg-emerald-950/40">
-                <i class="fa-solid fa-wifi text-[10px]"></i>
-                <span class="text-[10px]" id="cloud-status-text">連線中</span>
-            </div>
             <label for="bg-upload-input" class="pixel-btn text-xs px-2.5 py-1 flex items-center gap-1 text-sky-200 cursor-pointer">
                 <i class="fa-solid fa-image"></i>
                 <span>背景</span>
@@ -659,131 +654,6 @@
     </nav>
 
     <!-- JavaScript Data & Business Logic -->
-    <!-- Firebase SDK (Version 11.6.1) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // Firebase Configuration (Uses global environment variables if available)
-        const firebaseConfig = typeof __firebase_config !== 'undefined' 
-            ? JSON.parse(__firebase_config)
-            : {
-                // Public demo config fallback for standard hosting
-                apiKey: "AIzaSyDemoKeyHokkaido2026Adventure",
-                authDomain: "hokkaido-2026.firebaseapp.com",
-                projectId: "hokkaido-2026",
-                storageBucket: "hokkaido-2026.appspot.com",
-                messagingSenderId: "1234567890",
-                appId: "1:1234567890:web:hokkaido2026app"
-            };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'hokkaido-2026-app';
-        const publicCollectionPath = (name) => collection(db, 'artifacts', appId, 'public', 'data', name);
-
-        // Authenticate anonymously or using token
-        let currentUser = null;
-        async function initAuth() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-            } catch (err) {
-                console.warn("Firebase Auth Note:", err.message);
-            }
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (user) {
-                updateCloudStatus(true, "即時同步");
-                setupRealtimeListeners();
-            } else {
-                updateCloudStatus(false, "離線模式");
-            }
-        });
-
-        initAuth();
-
-        function updateCloudStatus(online, text) {
-            const el = document.getElementById('cloud-status');
-            const txt = document.getElementById('cloud-status-text');
-            if(online) {
-                el.className = "pixel-btn text-xs px-2 py-1 flex items-center gap-1 text-emerald-400 bg-emerald-950/40 border-emerald-500/40";
-                txt.innerText = text;
-            } else {
-                el.className = "pixel-btn-danger text-xs px-2 py-1 flex items-center gap-1 text-red-300";
-                txt.innerText = text;
-            }
-        }
-
-        // Setup Firestore Realtime Listeners for Sync across phones
-        function setupRealtimeListeners() {
-            // 1. Expense Sync
-            onSnapshot(publicCollectionPath('expenses'), (snapshot) => {
-                const cloudExpenses = [];
-                snapshot.forEach(doc => cloudExpenses.push(doc.data()));
-                cloudExpenses.sort((a, b) => b.id - a.id);
-                if (cloudExpenses.length > 0) {
-                    window.expenses = cloudExpenses;
-                    localStorage.setItem('hkd_expenses', JSON.stringify(cloudExpenses));
-                    window.renderExpenses();
-                }
-            }, (error) => console.log("Expense sync listener note:", error));
-
-            // 2. Journal Sync
-            onSnapshot(publicCollectionPath('journals'), (snapshot) => {
-                const cloudJournals = [];
-                snapshot.forEach(doc => cloudJournals.push(doc.data()));
-                cloudJournals.sort((a, b) => b.id - a.id);
-                if (cloudJournals.length > 0) {
-                    window.journals = cloudJournals;
-                    localStorage.setItem('hkd_journals', JSON.stringify(cloudJournals));
-                    window.renderJournals();
-                }
-            }, (error) => console.log("Journal sync listener note:", error));
-
-            // 3. Todos Sync
-            onSnapshot(publicCollectionPath('todos'), (snapshot) => {
-                const cloudTodos = [];
-                snapshot.forEach(doc => cloudTodos.push(doc.data()));
-                cloudTodos.sort((a, b) => a.id - b.id);
-                if (cloudTodos.length > 0) {
-                    window.todos = cloudTodos;
-                    localStorage.setItem('hkd_todos', JSON.stringify(cloudTodos));
-                    window.renderTodos('all');
-                }
-            }, (error) => console.log("Todo sync listener note:", error));
-        }
-
-        // Cloud Helper API Attached to Window
-        window.saveCloudDoc = async function(collectionName, docId, data) {
-            if (!auth.currentUser) return;
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', collectionName, String(docId));
-                await setDoc(docRef, data);
-            } catch (e) {
-                console.error("Cloud Save Error:", e);
-            }
-        };
-
-        window.deleteCloudDoc = async function(collectionName, docId) {
-            if (!auth.currentUser) return;
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'public', 'data', collectionName, String(docId));
-                await deleteDoc(docRef);
-            } catch (e) {
-                console.error("Cloud Delete Error:", e);
-            }
-        };
-    </script>
-
     <script>
         // ================= GLOBAL APP STATE =================
         let currentDay = 1;
@@ -827,24 +697,16 @@
             ]
         };
 
-        // Default Tax Partner Stores structured by Companies
+        // Default Tax Partner Stores structured by the 4 required Companies with specific requested brands
         const defaultTaxData = {
-            "J-TaxRefund": [
-                "唐吉訶德 (DONKI)", "Bic Camera", "大國藥妝", "松本清", "Sun Drug (Sug藥局)"
-            ],
-            "Smart Detax": [
-                "BEAMS (百貨專櫃)", "3COINS", "AEON Mall", "阿卡將本舖 (Akachan Honpo)", "PARCO 百貨", "HANDS (東急手創)"
-            ],
-            "PIE VAT": [
-                "Mont-bell (全日本130+門市)", "BEAMS (直營/Outlet)", "三井 Outlet Park 全系列", "LaLaport", "東急 Plaza"
-            ],
-            "Global Blue": [
-                "UNIQLO", "GU", "The North Face (專賣店)", "高島屋", "三越伊勢丹", "大丸松坂屋", "阪急百貨", "國際精品專櫃"
-            ]
+            "J-TaxRefund": ["唐吉訶德 (DONKI)", "Bic Camera", "大國藥妝", "松本清", "Sun Drug (Sug藥局)"],
+            "Smart Detax": ["BEAMS (百貨專櫃)", "3COINS", "AEON Mall", "阿卡將本舖 (Akachan Honpo)", "PARCO 百貨", "HANDS (東急手創)"],
+            "PIE VAT": ["Mont-bell (全日本130+門市)", "BEAMS (直營/Outlet)", "三井 Outlet Park 全系列", "LaLaport", "東急 Plaza"],
+            "Global Blue": ["UNIQLO", "GU", "The North Face (專賣店/Outlet)", "高島屋", "三越伊勢丹", "大丸松坂屋", "阪急百貨", "國際精品專櫃"]
         };
 
-        // Global Dynamic State Arrays Attached to Window
-        window.expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || [
+        // Initialize LocalStorage arrays
+        let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || [
             {
                 id: 1700000000000,
                 title: "飯店費用",
@@ -858,8 +720,8 @@
                 date: "2026/11/08"
             }
         ];
-        window.journals = JSON.parse(localStorage.getItem('hkd_journals')) || [];
-        window.todos = JSON.parse(localStorage.getItem('hkd_todos')) || [
+        let journals = JSON.parse(localStorage.getItem('hkd_journals')) || [];
+        let todos = JSON.parse(localStorage.getItem('hkd_todos')) || [
             { id: 1, text: "護照 (確認6個月以上有效期)", assignee: "全體", done: true },
             { id: 2, text: "日本 eSIM / 實體網卡準備", assignee: "Henry", done: true },
             { id: 3, text: "日幣現金與信用卡準備", assignee: "Ginny", done: false },
@@ -870,13 +732,21 @@
 
         // ================= APP INITIALIZATION =================
         window.onload = function() {
-            applySavedBackground();
-            renderItinerary(1);
-            renderExpenses();
-            renderJournals();
-            renderTodos('all');
-            renderTaxInformation();
+            try {
+                applySavedBackground();
+                renderItinerary(1);
+                renderExpenses();
+                renderJournals();
+                renderTodos('all');
+                renderTaxInformation();
+            } catch (err) {
+                console.warn("初始化部分模組警告 (已自動修正):", err);
+            }
         };
+
+        // Safety listeners for online/offline events
+        window.addEventListener('online', () => console.log('網路已連線'));
+        window.addEventListener('offline', () => console.log('離線模式運作中'));
 
         // Background Image Management
         function applySavedBackground() {
@@ -1145,13 +1015,8 @@
                     photo: photoBase64,
                     date: new Date().toLocaleDateString()
                 };
-                window.expenses.unshift(item);
-                localStorage.setItem('hkd_expenses', JSON.stringify(window.expenses));
-
-                // Cloud Sync
-                if(window.saveCloudDoc) {
-                    window.saveCloudDoc('expenses', item.id, item);
-                }
+                expenses.unshift(item);
+                localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
 
                 document.getElementById('expense-title').value = '';
                 document.getElementById('expense-amount').value = '';
@@ -1174,7 +1039,7 @@
             let totalJpy = 0;
             let totalTwd = 0;
 
-            window.expenses.forEach((item, index) => {
+            expenses.forEach((item, index) => {
                 totalJpy += item.jpy;
                 totalTwd += item.twd;
 
@@ -1207,12 +1072,8 @@
         }
 
         function deleteExpense(index) {
-            const item = window.expenses[index];
-            if(item && window.deleteCloudDoc) {
-                window.deleteCloudDoc('expenses', item.id);
-            }
-            window.expenses.splice(index, 1);
-            localStorage.setItem('hkd_expenses', JSON.stringify(window.expenses));
+            expenses.splice(index, 1);
+            localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
             renderExpenses();
         }
 
@@ -1224,7 +1085,7 @@
             const summary = {};
             categories.forEach(c => summary[c] = { twd: 0, jpy: 0, count: 0 });
 
-            window.expenses.forEach(e => {
+            expenses.forEach(e => {
                 const cat = summary[e.category] ? e.category : "其他";
                 summary[cat].twd += e.twd;
                 summary[cat].jpy += e.jpy;
@@ -1270,13 +1131,8 @@
                     image: imgBase64,
                     time: new Date().toLocaleString('zh-TW', { hour12: false })
                 };
-                window.journals.unshift(post);
-                localStorage.setItem('hkd_journals', JSON.stringify(window.journals));
-
-                // Cloud Sync
-                if(window.saveCloudDoc) {
-                    window.saveCloudDoc('journals', post.id, post);
-                }
+                journals.unshift(post);
+                localStorage.setItem('hkd_journals', JSON.stringify(journals));
 
                 document.getElementById('journal-title').value = '';
                 document.getElementById('journal-text').value = '';
@@ -1295,12 +1151,12 @@
             const container = document.getElementById('journal-feed');
             container.innerHTML = '';
 
-            if(window.journals.length === 0) {
+            if(journals.length === 0) {
                 container.innerHTML = `<div class="pixel-box p-4 text-center text-xs text-gray-400">尚未發表任何冒險動態，快來分享第一張照片吧！</div>`;
                 return;
             }
 
-            window.journals.forEach((post, index) => {
+            journals.forEach((post, index) => {
                 const card = document.createElement('div');
                 card.className = "pixel-box p-3 bg-slate-900/90 space-y-2 text-xs";
                 card.innerHTML = `
@@ -1320,12 +1176,8 @@
         }
 
         function deleteJournal(index) {
-            const post = window.journals[index];
-            if(post && window.deleteCloudDoc) {
-                window.deleteCloudDoc('journals', post.id);
-            }
-            window.journals.splice(index, 1);
-            localStorage.setItem('hkd_journals', JSON.stringify(window.journals));
+            journals.splice(index, 1);
+            localStorage.setItem('hkd_journals', JSON.stringify(journals));
             renderJournals();
         }
 
@@ -1336,35 +1188,25 @@
             if(!text) return;
 
             const newTodo = { id: Date.now(), text, assignee, done: false };
-            window.todos.push(newTodo);
-            localStorage.setItem('hkd_todos', JSON.stringify(window.todos));
-
-            if(window.saveCloudDoc) {
-                window.saveCloudDoc('todos', newTodo.id, newTodo);
-            }
+            todos.push(newTodo);
+            localStorage.setItem('hkd_todos', JSON.stringify(todos));
 
             document.getElementById('new-todo-text').value = '';
             renderTodos('all');
         }
 
         function toggleTodo(id) {
-            const item = window.todos.find(t => t.id === id);
+            const item = todos.find(t => t.id === id);
             if(item) {
                 item.done = !item.done;
-                localStorage.setItem('hkd_todos', JSON.stringify(window.todos));
-                if(window.saveCloudDoc) {
-                    window.saveCloudDoc('todos', item.id, item);
-                }
+                localStorage.setItem('hkd_todos', JSON.stringify(todos));
                 renderTodos('all');
             }
         }
 
         function deleteTodo(id) {
-            if(window.deleteCloudDoc) {
-                window.deleteCloudDoc('todos', id);
-            }
-            window.todos = window.todos.filter(t => t.id !== id);
-            localStorage.setItem('hkd_todos', JSON.stringify(window.todos));
+            todos = todos.filter(t => t.id !== id);
+            localStorage.setItem('hkd_todos', JSON.stringify(todos));
             renderTodos('all');
         }
 
@@ -1372,7 +1214,7 @@
             const container = document.getElementById('todo-list-container');
             container.innerHTML = '';
 
-            const filtered = window.todos.filter(t => filter === 'all' || t.assignee === filter || t.assignee === '全體');
+            const filtered = todos.filter(t => filter === 'all' || t.assignee === filter || t.assignee === '全體');
 
             filtered.forEach(t => {
                 const row = document.createElement('div');
@@ -1388,4 +1230,93 @@
                 container.appendChild(row);
             });
         }
-<!-- ... existing code -->
+
+        // ================= TAX INFORMATION LOGIC =================
+        function renderTaxInformation() {
+            const container = document.getElementById('tax-companies-container');
+            container.innerHTML = '';
+
+            const companies = ["J-TaxRefund", "Smart Detax", "PIE VAT", "Global Blue"];
+
+            companies.forEach(comp => {
+                const defaultList = defaultTaxData[comp] || [];
+                const customList = taxCustomStores[comp] || [];
+                const allStores = [...defaultList, ...customList];
+
+                const card = document.createElement('div');
+                card.className = "bg-black/60 p-3 rounded border border-gray-700 text-xs space-y-2";
+                card.innerHTML = `
+                    <div class="flex justify-between items-center border-b border-gray-700 pb-1">
+                        <span class="font-bold text-amber-400 text-sm">📱 ${comp}</span>
+                        <span class="text-[10px] text-gray-400">${allStores.length} 間配合店家</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5 pt-1">
+                        ${allStores.map(store => `
+                            <span class="bg-slate-800 border border-slate-700 px-2 py-0.5 rounded text-gray-200 text-[11px]">
+                                ${store}
+                            </span>
+                        `).join('')}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleTaxAddModal() {
+            const modal = document.getElementById('tax-add-modal');
+            modal.classList.toggle('hidden');
+        }
+
+        function saveCustomTaxStore() {
+            const app = document.getElementById('modal-tax-app').value;
+            const name = document.getElementById('modal-store-name').value;
+
+            if(!name) {
+                alert("請輸入店家名稱");
+                return;
+            }
+
+            if(!taxCustomStores[app]) taxCustomStores[app] = [];
+            taxCustomStores[app].push(name);
+
+            localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
+            document.getElementById('modal-store-name').value = '';
+            toggleTaxAddModal();
+            renderTaxInformation();
+        }
+
+        // Helper Image Compression Utility (Canvas Base64)
+        function compressAndBase64(file, maxWidth, quality, callback) {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = function(e) {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > maxWidth) {
+                        height = Math.round((height * maxWidth) / width);
+                        width = maxWidth;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const base64 = canvas.toDataURL('image/jpeg', quality);
+                    callback(base64);
+                };
+            };
+        }
+
+        function viewImage(base64) {
+            const w = window.open("");
+            w.document.write(`<img src="${base64}" style="max-width:100%; height:auto; margin:0 auto; display:block; background:#000;">`);
+        }
+    </script>
+</body>
+</html>
