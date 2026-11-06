@@ -36,8 +36,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
 
-    <!-- PubNub / PieSocket 免費即時雲端廣播 SDK (零金鑰全自動 A/B 手機連動引擎) -->
-    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Firebase App & Realtime Database SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         /* Minecraft Dungeons Winter & Autumn Forest Bright Adventure Styling */
@@ -154,7 +155,7 @@
                 <h1 class="pixel-font text-sky-200 text-sm tracking-wide">Hokkaido</h1>
                 <p class="text-[10px] text-amber-300/90 font-semibold flex items-center gap-1">
                     <span>隊伍：自由的感覺</span>
-                    <span id="cloud-status-badge" class="bg-amber-900/80 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded text-[9px]">📡 連線準備中</span>
+                    <span id="cloud-status-badge" class="bg-amber-900/80 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded text-[9px]">📡 連線中</span>
                 </p>
             </div>
         </div>
@@ -579,8 +580,23 @@
         </div>
     </nav>
 
-    <!-- JavaScript Data & Business Logic with Dual Protection -->
+    <!-- JavaScript Data & Business Logic -->
     <script>
+        // ================= FIREBASE REALTIME CLOUD SYNC CONFIG =================
+        const firebaseConfig = {
+            databaseURL: "https://hokkaido-2026-default-rtdb.firebaseio.com"
+        };
+        
+        let db = null;
+        try {
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.database();
+        } catch(e) {
+            console.warn("Firebase App Initializing...", e);
+        }
+
         // ================= GLOBAL APP STATE =================
         let currentDay = 1;
         let isUnlocked = false;
@@ -625,7 +641,6 @@
             { id: 1700000000000, title: "飯店費用", curr: "TWD", originalAmount: 11191, jpy: Math.round(11191 / 0.215), twd: 11191, category: "其他", payer: "Ginny", photo: null, date: "2026/11/08" }
         ];
 
-        // 載入本地存檔
         let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || [...defaultPresetExpenses];
         let journals = JSON.parse(localStorage.getItem('hkd_journals')) || [];
         let todos = JSON.parse(localStorage.getItem('hkd_todos')) || [
@@ -637,7 +652,6 @@
         let vouchers = JSON.parse(localStorage.getItem('hkd_vouchers')) || [];
         let taxCustomStores = JSON.parse(localStorage.getItem('hkd_tax_stores')) || {};
 
-        // 檢查並保護預設費用 (機票與飯店)
         function ensurePresetExpenses() {
             defaultPresetExpenses.forEach(presetItem => {
                 const exists = expenses.some(e => e.id === presetItem.id || e.title === presetItem.title);
@@ -645,76 +659,49 @@
             });
         }
 
-        // ================= INSTANT BROADCAST P2P SYNC ENGINE =================
-        let broadcastChannel = null;
+        // ================= REALTIME FIREBASE SYNC =================
+        function initFirebaseListeners() {
+            if (!db) return;
 
-        function initBroadcastChannel() {
-            try {
-                // 使用跨瀏覽器廣播 (同手機分頁/背景即時) 與 Peer/WebSocket API
-                if ('BroadcastChannel' in window) {
-                    broadcastChannel = new BroadcastChannel('hokkaido_2026_sync_channel');
-                    broadcastChannel.onmessage = (event) => {
-                        handleIncomingCloudData(event.data);
-                    };
-                }
-                
-                // 本地事件與跨視窗監聽
-                window.addEventListener('storage', (e) => {
-                    if (e.key === 'hkd_expenses') {
-                        expenses = JSON.parse(e.newValue || '[]');
-                        ensurePresetExpenses();
-                        renderExpenses();
-                    } else if (e.key === 'hkd_todos') {
-                        todos = JSON.parse(e.newValue || '[]');
-                        renderTodos('all');
-                    } else if (e.key === 'hkd_journals') {
-                        journals = JSON.parse(e.newValue || '[]');
-                        renderJournals();
-                    }
-                });
-
+            db.ref('hokkaido_data').on('value', (snapshot) => {
+                const data = snapshot.val();
                 const badge = document.getElementById('cloud-status-badge');
-                if (badge) {
-                    badge.innerText = "⚡ 跨裝置同步中";
-                    badge.className = "bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded text-[9px]";
+
+                if (data) {
+                    if (data.expenses) expenses = data.expenses;
+                    if (data.journals) journals = data.journals;
+                    if (data.todos) todos = data.todos;
+                    if (data.vouchers) vouchers = data.vouchers;
+                    if (data.taxCustomStores) taxCustomStores = data.taxCustomStores;
+
+                    // 強制檢查並保護預設機票與飯店費用
+                    ensurePresetExpenses();
+
+                    // 更新本地備份
+                    localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
+                    localStorage.setItem('hkd_journals', JSON.stringify(journals));
+                    localStorage.setItem('hkd_todos', JSON.stringify(todos));
+                    localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
+                    localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
+
+                    // 重新渲染畫面
+                    renderExpenses();
+                    renderJournals();
+                    renderTodos('all');
+                    if (isUnlocked) renderVouchers();
+                    renderTaxInformation();
+
+                    if (badge) {
+                        badge.innerText = "🟢 雙機雲端連線中";
+                        badge.className = "bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded text-[9px]";
+                    }
                 }
-            } catch(e) {
-                console.warn("Broadcast Sync initialized locally", e);
-            }
+            }, (error) => {
+                console.warn("Firebase Read Error:", error);
+            });
         }
 
-        function handleIncomingCloudData(data) {
-            if (!data) return;
-            if (data.expenses) {
-                expenses = data.expenses;
-                ensurePresetExpenses();
-                localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
-                renderExpenses();
-            }
-            if (data.journals) {
-                journals = data.journals;
-                localStorage.setItem('hkd_journals', JSON.stringify(journals));
-                renderJournals();
-            }
-            if (data.todos) {
-                todos = data.todos;
-                localStorage.setItem('hkd_todos', JSON.stringify(todos));
-                renderTodos('all');
-            }
-            if (data.vouchers) {
-                vouchers = data.vouchers;
-                localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
-                if (isUnlocked) renderVouchers();
-            }
-            if (data.taxCustomStores) {
-                taxCustomStores = data.taxCustomStores;
-                localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
-                renderTaxInformation();
-            }
-        }
-
-        // 雙向同步核心推播
-        function syncAllToCloud() {
+        function pushDataToCloud() {
             ensurePresetExpenses();
             localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
             localStorage.setItem('hkd_journals', JSON.stringify(journals));
@@ -722,37 +709,35 @@
             localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
             localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
 
-            const payload = {
-                expenses,
-                journals,
-                todos,
-                vouchers,
-                taxCustomStores,
-                updatedAt: Date.now()
-            };
-
-            if (broadcastChannel) {
-                broadcastChannel.postMessage(payload);
+            if (db) {
+                db.ref('hokkaido_data').set({
+                    expenses,
+                    journals,
+                    todos,
+                    vouchers,
+                    taxCustomStores,
+                    updatedAt: Date.now()
+                });
             }
         }
 
         function saveData(key, data) {
-            syncAllToCloud();
+            pushDataToCloud();
         }
 
         // ================= APP INITIALIZATION =================
         window.onload = function() {
             ensurePresetExpenses();
             applySavedBackground();
-            initBroadcastChannel();
             renderItinerary(1);
             renderExpenses();
             renderJournals();
             renderTodos('all');
             renderTaxInformation();
+            initFirebaseListeners();
         };
 
-        // ================= UI SWITCH & RENDERERS =================
+        // UI Handlers
         function applySavedBackground() {
             const resetBtn = document.getElementById('reset-bg-btn');
             if(savedBgImage) {
@@ -866,7 +851,7 @@
             document.getElementById('sim-ropeway').innerText = ropeways[Math.floor(Math.random() * ropeways.length)];
         }
 
-        // ================= BOOKINGS & PIN UNLOCK =================
+        // Bookings PIN Unlock
         function unlockVouchers() {
             const pin = document.getElementById('pin-input').value;
             if(pin === '2026') {
@@ -932,7 +917,7 @@
             renderVouchers();
         }
 
-        // ================= WALLET & EXPENSE LOGIC =================
+        // Wallet Logic
         function switchWalletSubTab(sub) {
             if(sub === 'calc') {
                 document.getElementById('wallet-pane-calc').classList.remove('hidden');
@@ -1116,7 +1101,7 @@
             });
         }
 
-        // ================= JOURNAL LOGIC =================
+        // Journal Logic
         function addJournalPost() {
             const titleInput = document.getElementById('journal-title').value.trim();
             const text = document.getElementById('journal-text').value;
@@ -1184,7 +1169,7 @@
             renderJournals();
         }
 
-        // ================= TODOS / LISTS LOGIC =================
+        // Todos Logic
         function addTodoItem() {
             const text = document.getElementById('new-todo-text').value;
             const assignee = document.getElementById('new-todo-assignee').value;
@@ -1234,7 +1219,7 @@
             });
         }
 
-        // ================= TAX INFORMATION LOGIC =================
+        // Tax Logic
         function renderTaxInformation() {
             const container = document.getElementById('tax-companies-container');
             container.innerHTML = '';
@@ -1288,7 +1273,7 @@
             toggleTaxAddModal();
         }
 
-        // Helper Image Compression Utility
+        // Image Compression Helper
         function compressAndBase64(file, maxWidth, quality, callback) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
