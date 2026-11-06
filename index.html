@@ -31,14 +31,14 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- Firebase App & Realtime Database SDK (Compat Version for 100% Mobile Stability) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
     <!-- Google Fonts: Pixel Fonts & Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-
-    <!-- Firebase App & Realtime Database SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <style>
         /* Minecraft Dungeons Winter & Autumn Forest Bright Adventure Styling */
@@ -153,10 +153,7 @@
             </div>
             <div>
                 <h1 class="pixel-font text-sky-200 text-sm tracking-wide">Hokkaido</h1>
-                <p class="text-[10px] text-amber-300/90 font-semibold flex items-center gap-1">
-                    <span>隊伍：自由的感覺</span>
-                    <span id="cloud-status-badge" class="bg-amber-900/80 text-amber-300 border border-amber-500/40 px-1.5 py-0.2 rounded text-[9px]">📡 連線中</span>
-                </p>
+                <p class="text-[10px] text-amber-300/90 font-semibold">隊伍：自由的感覺 <i class="fa-solid fa-chevron-right text-[8px]"></i></p>
             </div>
         </div>
         <div class="flex gap-1">
@@ -176,11 +173,10 @@
     </header>
 
     <!-- Main Content Container (Mobile Centered) -->
-    <main class="max-w-md mx-auto">
+    <main class="max-w-md mx-auto pb-6">
 
         <!-- ================= PAGE 1: PLAN (行程表) ================= -->
         <section id="tab-plan" class="tab-content space-y-4">
-            <!-- Day Selector -->
             <div class="flex overflow-x-auto gap-2 pb-2 scrollbar-none">
                 <button onclick="switchDay(1)" id="day-btn-1" class="pixel-btn px-3 py-2 text-xs font-bold whitespace-nowrap flex-1 text-center">Day 1<br><span class="text-[10px] text-gray-400">11/08(日)</span></button>
                 <button onclick="switchDay(2)" id="day-btn-2" class="pixel-btn px-3 py-2 text-xs font-bold whitespace-nowrap flex-1 text-center">Day 2<br><span class="text-[10px] text-gray-400">11/09(一)</span></button>
@@ -189,7 +185,6 @@
                 <button onclick="switchDay(5)" id="day-btn-5" class="pixel-btn px-3 py-2 text-xs font-bold whitespace-nowrap flex-1 text-center">Day 5<br><span class="text-[10px] text-gray-400">11/12(四)</span></button>
             </div>
 
-            <!-- Special Weather & Ropeway Widget -->
             <div id="day1-ropeway-widget" class="pixel-box-gold p-3 rounded">
                 <div class="flex justify-between items-center mb-2">
                     <span class="pixel-font text-xs text-amber-400 flex items-center gap-1">
@@ -215,7 +210,6 @@
                 </div>
             </div>
 
-            <!-- Itinerary Timeline Card Container -->
             <div id="itinerary-list" class="space-y-3"></div>
         </section>
 
@@ -284,10 +278,15 @@
                         <div>Check-in: <span class="text-amber-300">15:00 後</span></div>
                         <div>Check-out: <span class="text-amber-300">11:00 前</span></div>
                     </div>
+                    <div class="pt-2 flex justify-between items-center text-gray-300">
+                        <span>預計入住隊員: Henry, Ginny</span>
+                        <a href="https://maps.google.com/?q=Mitsui+Garden+Hotel+Sapporo+West" target="_blank" class="pixel-btn text-[10px] px-2 py-1 text-amber-300">
+                            導航地圖 <i class="fa-solid fa-location-arrow"></i>
+                        </a>
+                    </div>
                 </div>
             </div>
 
-            <!-- Protected Vouchers Section -->
             <div class="pixel-box p-4 bg-slate-900/60">
                 <div class="flex justify-between items-center mb-3">
                     <h3 class="pixel-font text-amber-400 text-xs flex items-center gap-2">
@@ -318,7 +317,7 @@
             </div>
         </section>
 
-        <!-- ================= PAGE 3: WALLET & EXPENSE ================= -->
+        <!-- ================= PAGE 3: WALLET & EXPENSE (記帳與匯率) ================= -->
         <section id="tab-wallet" class="tab-content hidden space-y-4">
             <div class="flex bg-slate-900 border-2 border-gray-700 rounded p-1 text-xs">
                 <button id="wallet-subtab-1" onclick="switchWalletSubTab('calc')" class="flex-1 py-1.5 text-center rounded font-bold bg-amber-500/20 text-amber-400">即時算盤/記帳</button>
@@ -334,7 +333,7 @@
                         </div>
                     </div>
                     <div class="space-y-2">
-                        <input type="text" id="calc-expression" placeholder="輸入算式如 500+200*3" class="w-full bg-black/80 border border-gray-700 p-2 text-right pixel-subfont text-xl text-amber-400 rounded focus:outline-none">
+                        <input type="text" id="calc-expression" placeholder="輸入算式如 500+200*3" class="w-full bg-black/80 border border-gray-700 p-2 text-right pixel-subfont text-xl text-amber-400 rounded focus:outline-none focus:border-amber-400">
                         <div class="flex justify-between items-center text-xs px-1">
                             <span class="text-gray-400">計算結果:</span>
                             <span class="font-bold text-lg text-emerald-400" id="calc-result-jpy">￥ 0 (約 NT$ 0)</span>
@@ -344,10 +343,10 @@
                 </div>
 
                 <div class="pixel-box p-3 bg-slate-900/90 space-y-2">
-                    <h3 class="pixel-font text-xs text-amber-400 mb-1"><i class="fa-solid fa-plus-circle"></i> 新增冒險花費 (選填)</h3>
+                    <h3 class="pixel-font text-xs text-amber-400 mb-1"><i class="fa-solid fa-plus-circle"></i> 新增冒險花費</h3>
                     <div class="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                            <label class="text-gray-400 block mb-0.5">幣別與金額 *</label>
+                            <label class="text-gray-400 block mb-0.5">幣別與金額</label>
                             <div class="flex gap-1">
                                 <select id="expense-currency" onchange="onCurrencyChange()" class="bg-black border border-gray-700 text-amber-300 rounded px-1 py-1 text-xs">
                                     <option value="JPY">￥ JPY</option>
@@ -357,7 +356,7 @@
                             </div>
                         </div>
                         <div>
-                            <label class="text-gray-400 block mb-0.5">花費品項 (留空自動帶入)</label>
+                            <label class="text-gray-400 block mb-0.5">花費品項</label>
                             <input type="text" id="expense-title" placeholder="如 一幻拉麵" class="w-full bg-black border border-gray-700 p-1 text-white rounded">
                         </div>
                     </div>
@@ -369,7 +368,7 @@
                                 <option value="交通">🚃 交通票券</option>
                                 <option value="購物">🛍️ 購物戰利品</option>
                                 <option value="門票">🎟️ 門票娛樂</option>
-                                <option value="其他" selected>📦 其他雜項</option>
+                                <option value="其他">📦 其他雜項</option>
                             </select>
                         </div>
                         <div>
@@ -382,7 +381,7 @@
                         </div>
                     </div>
                     <div>
-                        <label class="text-gray-400 text-xs block mb-0.5">收據/小票拍照上傳 (選填)</label>
+                        <label class="text-gray-400 text-xs block mb-0.5">收據/小票拍照上傳 (自動壓縮)</label>
                         <input type="file" id="expense-photo" accept="image/*" class="text-xs text-gray-400 w-full">
                     </div>
                     <button onclick="addExpenseItem()" class="pixel-btn-gold w-full py-2 text-xs font-bold mt-1">寫入金庫記事本 📜</button>
@@ -417,8 +416,8 @@
                     <i class="fa-solid fa-camera-retro"></i> 冒險圖文日誌 (JOURNAL)
                 </h3>
                 <div class="space-y-2 text-xs">
-                    <input type="text" id="journal-title" placeholder="日誌標題 (留空自動帶入)" class="w-full bg-black border border-gray-700 p-1.5 rounded text-white">
-                    <textarea id="journal-text" rows="2" placeholder="分享這一刻的冒險心得 (選填)..." class="w-full bg-black border border-gray-700 p-1.5 rounded text-white"></textarea>
+                    <input type="text" id="journal-title" placeholder="日誌標題 (如 小樽運河夜景)" class="w-full bg-black border border-gray-700 p-1.5 rounded text-white">
+                    <textarea id="journal-text" rows="2" placeholder="分享這一刻的冒險心得..." class="w-full bg-black border border-gray-700 p-1.5 rounded text-white"></textarea>
                     <div class="flex gap-2 items-center">
                         <select id="journal-author" class="bg-black border border-gray-700 p-1 rounded text-amber-300">
                             <option value="Ginny (魔法師)">Ginny (魔法師)</option>
@@ -490,8 +489,15 @@
                     <h3 class="pixel-font text-amber-400 text-xs flex items-center gap-2">
                         <i class="fa-solid fa-receipt"></i> 2026 日本退稅新制與配合 APP 店家
                     </h3>
-                    <button onclick="toggleTaxAddModal()" class="pixel-btn-gold text-[10px] px-2 py-1">+ 新增配合店家</button>
+                    <button onclick="toggleTaxAddModal()" class="pixel-btn-gold text-[10px] px-2 py-1">
+                        + 新增配合店家
+                    </button>
                 </div>
+                
+                <p class="text-[11px] text-gray-300 leading-relaxed bg-black/40 p-2 rounded border border-amber-500/20">
+                    💡 <strong class="text-amber-400">2026/11 日本退稅新制懶人包：</strong> 機場設立自助退稅機台，或可下載以下指定退稅 APP 使用信用卡進行離境退稅。
+                </p>
+
                 <div id="tax-companies-container" class="space-y-3"></div>
             </div>
         </section>
@@ -505,6 +511,7 @@
                     </h3>
                     <p class="text-[11px] text-sky-200 mt-1">隊伍名稱：<span class="font-bold text-amber-300">自由的感覺</span></p>
                 </div>
+                
                 <div class="grid grid-cols-1 gap-3">
                     <div class="flex items-center space-x-3 bg-black/25 p-2.5 rounded border border-red-500/40">
                         <div class="w-12 h-12 bg-red-900/40 border border-red-400 rounded flex items-center justify-center text-xl">⚔️</div>
@@ -513,11 +520,28 @@
                             <div class="text-xs text-gray-200">主力輸出 / 路線規劃 / 烤肉擔當</div>
                         </div>
                     </div>
+
                     <div class="flex items-center space-x-3 bg-black/25 p-2.5 rounded border border-purple-500/40">
                         <div class="w-12 h-12 bg-purple-900/40 border border-purple-400 rounded flex items-center justify-center text-xl">🧙‍♀️</div>
                         <div>
                             <div class="font-bold text-sm text-purple-300">Ginny <span class="text-xs text-purple-400 ml-1">(魔法師 • 本次參隊)</span></div>
                             <div class="text-xs text-gray-200">購物魔法 / 美食甜點搜尋 / 記帳大師</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 bg-black/20 p-2.5 rounded border border-gray-600/30 opacity-75">
+                        <div class="w-12 h-12 bg-emerald-900/30 border border-emerald-500/30 rounded flex items-center justify-center text-xl">🧪</div>
+                        <div>
+                            <div class="font-bold text-sm text-gray-300">Ciao <span class="text-xs text-gray-400 ml-1">(補師 • 未參與這次冒險)</span></div>
+                            <div class="text-xs text-gray-400">後勤補給 / 留守基地</div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-3 bg-black/20 p-2.5 rounded border border-gray-600/30 opacity-75">
+                        <div class="w-12 h-12 bg-yellow-900/30 border border-yellow-500/30 rounded flex items-center justify-center text-xl">🤡</div>
+                        <div>
+                            <div class="font-bold text-sm text-gray-300">Rain <span class="text-xs text-gray-400 ml-1">(小丑 • 未參與這次冒險)</span></div>
+                            <div class="text-xs text-gray-400">氣氛製造 / 留守基地</div>
                         </div>
                     </div>
                 </div>
@@ -551,97 +575,88 @@
     </div>
 
     <!-- Bottom Fixed Pixel Navigation Bar -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-950/95 border-t-4 border-gray-800 z-40 backdrop-blur pb-[env(safe-area-inset-bottom)]">
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-950/95 border-t-4 border-gray-800 z-40 backdrop-blur">
         <div class="max-w-md mx-auto grid grid-cols-6 text-center text-[10px]">
-            <button onclick="switchTab('plan')" id="nav-plan" class="py-3 text-amber-400 tab-active flex flex-col items-center">
+            <button onclick="switchTab('plan')" id="nav-plan" class="py-2.5 text-amber-400 tab-active flex flex-col items-center">
                 <i class="fa-solid fa-map-location-dot text-sm mb-0.5"></i>
                 <span>行程</span>
             </button>
-            <button onclick="switchTab('bookings')" id="nav-bookings" class="py-3 text-gray-400 flex flex-col items-center">
+            <button onclick="switchTab('bookings')" id="nav-bookings" class="py-2.5 text-gray-400 flex flex-col items-center">
                 <i class="fa-solid fa-ticket text-sm mb-0.5"></i>
                 <span>預訂</span>
             </button>
-            <button onclick="switchTab('wallet')" id="nav-wallet" class="py-3 text-gray-400 flex flex-col items-center">
+            <button onclick="switchTab('wallet')" id="nav-wallet" class="py-2.5 text-gray-400 flex flex-col items-center">
                 <i class="fa-solid fa-coins text-sm mb-0.5"></i>
                 <span>記帳</span>
             </button>
-            <button onclick="switchTab('journal')" id="nav-journal" class="py-3 text-gray-400 flex flex-col items-center">
+            <button onclick="switchTab('journal')" id="nav-journal" class="py-2.5 text-gray-400 flex flex-col items-center">
                 <i class="fa-solid fa-book-bookmark text-sm mb-0.5"></i>
                 <span>日誌</span>
             </button>
-            <button onclick="switchTab('lists')" id="nav-lists" class="py-3 text-gray-400 flex flex-col items-center">
+            <button onclick="switchTab('lists')" id="nav-lists" class="py-2.5 text-gray-400 flex flex-col items-center">
                 <i class="fa-solid fa-check-double text-sm mb-0.5"></i>
                 <span>清單</span>
             </button>
-            <button onclick="switchTab('info')" id="nav-info" class="py-3 text-gray-400 flex flex-col items-center">
+            <button onclick="switchTab('info')" id="nav-info" class="py-2.5 text-gray-400 flex flex-col items-center">
                 <i class="fa-solid fa-circle-info text-sm mb-0.5"></i>
                 <span>情報</span>
             </button>
         </div>
     </nav>
 
-    <!-- JavaScript Data & Business Logic -->
+    <!-- JavaScript Data & Business Logic + Firebase Realtime Sync -->
     <script>
-        // ================= FIREBASE REALTIME CLOUD SYNC CONFIG =================
+        // ================= FIREBASE INITIALIZATION =================
         const firebaseConfig = {
-            databaseURL: "https://hokkaido-2026-default-rtdb.firebaseio.com"
+            apiKey: "AIzaSyCWdDAorDpOTbU9-0UKxA_PIcDoLeNkXN4",
+            authDomain: "hokkaido-2026-84ae7.firebaseapp.com",
+            databaseURL: "https://hokkaido-2026-84ae7-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hokkaido-2026-84ae7",
+            storageBucket: "hokkaido-2026-84ae7.firebasestorage.app",
+            messagingSenderId: "252503161145",
+            appId: "1:252503161145:web:6ba4a88dde778441f450e8",
+            measurementId: "G-4MQMP44X4X"
         };
-        
-        let db = null;
-        try {
-            if (!firebase.apps.length) {
-                firebase.initializeApp(firebaseConfig);
-            }
-            db = firebase.database();
-        } catch(e) {
-            console.warn("Firebase App Initializing...", e);
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
         }
+        const db = firebase.database();
 
         // ================= GLOBAL APP STATE =================
         let currentDay = 1;
         let isUnlocked = false;
         let savedBgImage = localStorage.getItem('hkd_bg_image') || null;
 
-        const itineraryData = {
-            1: [
-                { time: "10:55", title: "抵達新千歲機場 (CTS)", desc: "下機、通關與提行李約需 40–50 分鐘。", type: "flight" },
-                { time: "11:40–12:20", title: "搭乘 JR 快速 Airport 直達 JR 札幌站", desc: "車程約 40 分鐘。每 12 分鐘一班，錯過順延下一班即可。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
-                { time: "12:30–14:00", title: "飯店寄放行李 ✕ 午餐 (札幌站周邊)", desc: "1. 奧芝商店 駅前創成寺(招牌濃郁蝦湯底湯咖哩)\n2. 一幻蝦拉麵 (札幌站地下街分店)", map: "https://maps.google.com/?q=Sapporo+Station", type: "food" },
-                { time: "14:30–17:00", title: "大通公園散步 ✕ 戶外品牌購物", desc: "走 Chi-Ka-Ho 地下步行空間直通大通商圈。", map: "https://maps.google.com/?q=Chi-Ka-Ho+Sapporo", type: "spot" },
-                { time: "17:30–19:30", title: "晚餐：成吉思汗烤羊肉 / 湯咖哩", desc: "達摩 (だるま) 薄野各分店 (建議 17:00 前候位)。", map: "https://maps.google.com/?q=Daruma+Susukino", type: "food" }
-            ],
-            2: [
-                { time: "09:30–10:10", title: "搭乘 JR 快速列車前往 JR 小樽站", desc: "車程約 40 分鐘。", transit: "JR 快速 Express", cost: "￥750", type: "transit" },
-                { time: "10:30–12:00", title: "【午餐】小樽三角市場或在地美食", desc: "三角市場海鮮丼。", map: "https://maps.google.com/?q=Otaru+Sankaku+Market", type: "food" },
-                { time: "12:30–16:30", title: "小樽運河與堺町通商店街散步", desc: "北一硝子、小樽音樂盒堂。", map: "https://maps.google.com/?q=Otaru+Canal", type: "spot" }
-            ],
-            3: [
-                { time: "09:30–11:30", title: "北海道神宮 參拜", desc: "必吃神宮境內六花亭判官樣紅豆蕎麥餅。", map: "https://maps.google.com/?q=Hokkaido+Shrine", type: "spot" },
-                { time: "14:00–18:00", title: "市區核心購物時間", desc: "狸小路商店街與 PARCO 百貨。", map: "https://maps.google.com/?q=Sapporo+PARCO", type: "spot" }
-            ],
-            4: [
-                { time: "10:00–10:50", title: "公車往 三井 Outlet Park 札幌北廣島", desc: "直達公車約 50 分鐘。", transit: "直達巴士", cost: "￥320", type: "transit" },
-                { time: "11:00–16:00", title: "三井 Outlet Park 室內大採購", desc: "採購國際精品與戶外品牌。", map: "https://maps.google.com/?q=Mitsui+Outlet+Park+Sapporo+Kitahiroshima", type: "spot" }
-            ],
-            5: [
-                { time: "08:35–09:15", title: "搭乘 JR 快速 Airport 前往新千歲機場", desc: "車程約 40 分鐘。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
-                { time: "09:25–11:55", title: "機場國內線商圈最後巡禮 ✕ 報到登機", desc: "11:55 班機返台。", map: "https://maps.google.com/?q=New+Chitose+Airport", type: "flight" }
-            ]
-        };
-
-        const defaultTaxData = {
-            "J-TaxRefund": ["唐吉訶德 (DONKI)", "Bic Camera", "大國藥妝", "松本清", "Sun Drug"],
-            "Smart Detax": ["BEAMS", "3COINS", "AEON Mall", "阿卡將本舖", "PARCO 百貨"],
-            "PIE VAT": ["Mont-bell", "三井 Outlet Park 全系列", "LaLaport", "東急 Plaza"],
-            "Global Blue": ["UNIQLO", "GU", "The North Face", "高島屋", "三越伊勢丹", "大丸"]
-        };
-
-        const defaultPresetExpenses = [
-            { id: 1700000000001, title: "機票來回 兩人", curr: "TWD", originalAmount: 30508, jpy: Math.round(30508 / 0.215), twd: 30508, category: "交通", payer: "Ginny", photo: null, date: "2026/11/08" },
-            { id: 1700000000000, title: "飯店費用", curr: "TWD", originalAmount: 11191, jpy: Math.round(11191 / 0.215), twd: 11191, category: "其他", payer: "Ginny", photo: null, date: "2026/11/08" }
+        const defaultExpenses = [
+            {
+                id: 1700000000001,
+                title: "機票來回 兩人",
+                curr: "TWD",
+                originalAmount: 30508,
+                jpy: Math.round(30508 / 0.215),
+                twd: 30508,
+                category: "交通",
+                payer: "Ginny",
+                photo: null,
+                date: "2026/11/08"
+            },
+            {
+                id: 1700000000000,
+                title: "飯店費用",
+                curr: "TWD",
+                originalAmount: 11191,
+                jpy: Math.round(11191 / 0.215),
+                twd: 11191,
+                category: "其他",
+                payer: "Ginny",
+                photo: null,
+                date: "2026/11/08"
+            }
         ];
 
-        let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || [...defaultPresetExpenses];
+        let expenses = JSON.parse(localStorage.getItem('hkd_expenses')) || defaultExpenses;
         let journals = JSON.parse(localStorage.getItem('hkd_journals')) || [];
         let todos = JSON.parse(localStorage.getItem('hkd_todos')) || [
             { id: 1, text: "護照 (確認6個月以上有效期)", assignee: "全體", done: true },
@@ -652,92 +667,107 @@
         let vouchers = JSON.parse(localStorage.getItem('hkd_vouchers')) || [];
         let taxCustomStores = JSON.parse(localStorage.getItem('hkd_tax_stores')) || {};
 
-        function ensurePresetExpenses() {
-            defaultPresetExpenses.forEach(presetItem => {
-                const exists = expenses.some(e => e.id === presetItem.id || e.title === presetItem.title);
-                if (!exists) expenses.push(presetItem);
-            });
-        }
-
-        // ================= REALTIME FIREBASE SYNC =================
-        function initFirebaseListeners() {
-            if (!db) return;
-
-            db.ref('hokkaido_data').on('value', (snapshot) => {
-                const data = snapshot.val();
-                const badge = document.getElementById('cloud-status-badge');
-
-                if (data) {
-                    if (data.expenses) expenses = data.expenses;
-                    if (data.journals) journals = data.journals;
-                    if (data.todos) todos = data.todos;
-                    if (data.vouchers) vouchers = data.vouchers;
-                    if (data.taxCustomStores) taxCustomStores = data.taxCustomStores;
-
-                    // 強制檢查並保護預設機票與飯店費用
-                    ensurePresetExpenses();
-
-                    // 更新本地備份
-                    localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
-                    localStorage.setItem('hkd_journals', JSON.stringify(journals));
-                    localStorage.setItem('hkd_todos', JSON.stringify(todos));
-                    localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
-                    localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
-
-                    // 重新渲染畫面
-                    renderExpenses();
-                    renderJournals();
-                    renderTodos('all');
-                    if (isUnlocked) renderVouchers();
-                    renderTaxInformation();
-
-                    if (badge) {
-                        badge.innerText = "🟢 雙機雲端連線中";
-                        badge.className = "bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 px-1.5 py-0.2 rounded text-[9px]";
-                    }
-                }
-            }, (error) => {
-                console.warn("Firebase Read Error:", error);
-            });
-        }
-
-        function pushDataToCloud() {
-            ensurePresetExpenses();
-            localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
-            localStorage.setItem('hkd_journals', JSON.stringify(journals));
-            localStorage.setItem('hkd_todos', JSON.stringify(todos));
-            localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
-            localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
-
-            if (db) {
-                db.ref('hokkaido_data').set({
-                    expenses,
-                    journals,
-                    todos,
-                    vouchers,
-                    taxCustomStores,
-                    updatedAt: Date.now()
-                });
-            }
-        }
-
-        function saveData(key, data) {
-            pushDataToCloud();
-        }
-
-        // ================= APP INITIALIZATION =================
-        window.onload = function() {
-            ensurePresetExpenses();
-            applySavedBackground();
-            renderItinerary(1);
-            renderExpenses();
-            renderJournals();
-            renderTodos('all');
-            renderTaxInformation();
-            initFirebaseListeners();
+        // Default Itinerary Data
+        const itineraryData = {
+            1: [
+                { time: "10:55", title: "抵達新千歲機場 (CTS)", desc: "下機、通關與提行李約需 40–50 分鐘。", type: "flight" },
+                { time: "11:40–12:20", title: "搭乘 JR 快速 Airport 直達 JR 札幌站", desc: "車程約 40 分鐘。每 12 分鐘一班，錯過順延下一班即可。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
+                { time: "12:30–14:00", title: "飯店寄放行李 ✕ 午餐 (札幌站周邊)", desc: "1. 奧芝商店 駅前創成寺(招牌濃郁蝦湯底湯咖哩)\n2. 一幻蝦拉麵 (札幌站地下街分店)\n3. 一夜干海鮮丼Dekitateya 鐘樓店 or stellar place 6F也有。", map: "https://maps.google.com/?q=Sapporo+Station", type: "food" },
+                { time: "14:30–17:00", title: "大通公園散步 ✕ 戶外品牌購物 ✕ 甜點巡禮", desc: "1. 走 Chi-Ka-Ho 地下步行空間直通大通商圈\n2. Patagonia 札幌大通旗艦店 & mont-bell 赤れんが Terrace 店/PILLARS店\n3. 香水：Stellar Place (SHIRO, Aux Paradis, SHOLAYERED)\n4. 必吃甜點：KINOTOYA Cafe Odori Bisse (極濃牛奶霜淇淋)、北菓樓 札幌本館 (夢不思議大泡芙)", map: "https://maps.google.com/?q=Chi-Ka-Ho+Sapporo", type: "spot" },
+                { time: "17:30–19:30", title: "晚餐：成吉思汗烤羊肉 / 燒肉 / 湯咖哩", desc: "1. 達摩 (だるま) 薄野各分店 (建議 17:00 前候位)\n2. Yakiniku Jingisukan Horumon Fudo Susukino\n3. 肉處ぎんべこや (白老和牛燒肉與丼飯)\n4. 湯咖哩備案：GARAKU、Suage+、Picante 札幌站前店、SAMA", map: "https://maps.google.com/?q=Daruma+Susukino", type: "food" },
+                { time: "20:00–21:30", title: "狸小路散步 ✕ 夜間聖代 (夜パフェ)", desc: "1. 夜帕フェ體驗：Parfaiteria PaL 或 Initial (初期)\n2. 宵夜備案：Hirihiri 2號店 (湯咖哩)", map: "https://maps.google.com/?q=Tanukikoji+Shopping+Street", type: "spot" }
+            ],
+            2: [
+                { time: "09:30–10:10", title: "搭乘 JR 快速列車前往 JR 小樽站", desc: "車程約 40 分鐘。建議坐右側車窗欣賞石狩灣海景 (可提前劃指定席)。", transit: "JR 快速 Express", cost: "￥750", type: "transit" },
+                { time: "10:30–12:00", title: "【午餐】小樽三角市場或在地美食", desc: "1. 三角市場海鮮丼：滝波食堂、武田鮮魚店、三角亭\n2. 二角市場：丼兵衛小樽運河店\n3. 熟食備案：若雞時代なると本店 (必吃香酥炸半雞定食)", map: "https://maps.google.com/?q=Otaru+Sankaku+Market", type: "food" },
+                { time: "12:30–16:30", title: "小樽運河與堺町通商店街散步", desc: "順向路線：三角市場 ➔ 小樽運河 ➔ 堺町通 (北一硝子、小樽音樂盒堂) ➔ 最終步行至 JR 南小樽站搭車返回。\n甜點巡禮：LeTAO 本店 (雙層起司蛋糕)、六花亭 小樽運河店、北菓樓 小樽本館。", map: "https://maps.google.com/?q=Otaru+Canal", type: "spot" },
+                { time: "17:00–18:30", title: "【晚餐】小樽在地名店", desc: "老字號 Yabuhan Soba (薮半) 鴨肉高湯蕎麥麵，或壽司屋通 (Sushiya-dori) 海鮮壽司。", map: "https://maps.google.com/?q=Yabuhan+Soba+Otaru", type: "food" },
+                { time: "19:00–19:40", title: "搭乘 JR (南小樽站或小樽站) 返回札幌", desc: "輕鬆搭車返回札幌飯店，或返回札幌吃晚餐/宵夜。", transit: "JR 快速", cost: "￥750", type: "transit" }
+            ],
+            3: [
+                { time: "09:30–11:30", title: "北海道神宮 參拜", desc: "搭地鐵東西線至「圓山公園站」。必吃神宮境內六花亭神宮茶屋限定現煎「判官樣」紅豆蕎麥餅。", transit: "地鐵東西線", cost: "￥210", map: "https://maps.google.com/?q=Hokkaido+Shrine", type: "spot" },
+                { time: "12:00–13:30", title: "【午餐】和牛燒肉或壽司", desc: "Yakiniku Tokuju K-Place (午餐高CP) 或 肉處ぎんべこや (白老和牛燒肉) 或 Toriton 迴轉壽司。", map: "https://maps.google.com/?q=Toriton+Sushi+Sapporo", type: "food" },
+                { time: "14:00–18:00", title: "【方案A/B】市區核心購物時間", desc: "1. 狸小路商店街：採購藥妝、伴手禮、業務超市狸小路店。\n2. Sapporo PARCO：逛日系潮流服飾與銀飾選品 (S.O.S fp, Flags Sapporo 代理 First Arrow's 銀飾).\n貼心提醒：買完戰利品可先拿回飯店寄放。", map: "https://maps.google.com/?q=Sapporo+PARCO", type: "spot" },
+                { time: "15:00–19:00", title: "【方案B】藻岩山纜車賞夜景 (偏冷風大)", desc: "15:15 搭乘札幌市電至「纜車入口站」➔ 15:35 轉免費接駁巴士至山麓站 ➔ 16:00 雙段纜車登頂 (大型纜車 + 莫ーリス號)。", transit: "市電 + 接駁車 + 纜車", cost: "￥2,100", map: "https://maps.google.com/?q=Mt.+Moiwa+Ropeway", type: "spot" },
+                { time: "18:30–21:30", title: "【晚餐】頂級螃蟹會席大餐 OR 湯咖哩", desc: "選項 1：預約好的札幌蟹家 (Kaniya Sapporo) 或老字號料亭 杉之目。\n選項 2 (彈性)：Picante 札幌站前店 或 奧芝商店 駅前創成寺湯咖哩。", map: "https://maps.google.com/?q=Kaniya+Sapporo", type: "food" }
+            ],
+            4: [
+                { time: "10:00–10:50", title: "公車往 三井 Outlet Park 札幌北廣島", desc: "從札幌站前搭乘直達公車 (約 50 分鐘)。", transit: "直達巴士", cost: "￥320", type: "transit" },
+                { time: "11:00–16:00", title: "三井 Outlet Park 室內大採購 ✕ 園區午餐", desc: "採購國際精品、戶外品牌與運動服飾，並於 Outlet 內享用午餐。", map: "https://maps.google.com/?q=Mitsui+Outlet+Park+Sapporo+Kitahiroshima", type: "spot" },
+                { time: "16:30", title: "返回札幌站 / 順路逛潮流專賣店", desc: "順路逛 The North Face Sapporo Factory Shop 或 JR Tower Stellar Place。", type: "spot" },
+                { time: "18:30–20:30", title: "【晚餐】質感炭火串燒居酒屋", desc: "1. 炭火鳥燒 蔵鵡 本邸 (備長炭高質感串燒)\n2. 串鳥 札幌站前店 (高 CP 值在地首選)", map: "https://maps.google.com/?q=Kuramu+Sapporo", type: "food" }
+            ],
+            5: [
+                { time: "08:00–08:30", title: "辦理退房 ➔ 前往 JR 札幌站", desc: "辦理退房手續，攜帶行李至 JR 札幌站。", type: "transit" },
+                { time: "08:35–09:15", title: "搭乘 JR 快速 Airport 前往新千歲機場", desc: "車程約 37–40 分鐘。最晚 09:30 前抵達報到櫃檯。", transit: "JR 快速 Airport", cost: "￥1,150", type: "transit" },
+                { time: "09:25–11:55", title: "機場國內線商圈最後巡禮 ✕ 報到登機", desc: "通關前撥出 20–30 分鐘至巨大的新千歲機場國內線 2F 商圈大補貨 (六花亭、LeTAO、ROYCE' 生巧克力、美瑛選果玉米麵包)。11:55 班機返台。", map: "https://maps.google.com/?q=New+Chitose+Airport", type: "flight" }
+            ]
         };
 
-        // UI Handlers
+        const defaultTaxData = {
+            "J-TaxRefund": ["唐吉訶德 (DONKI)", "Bic Camera", "大國藥妝", "松本清", "Sun Drug (Sug藥局)"],
+            "Smart Detax": ["BEAMS (百貨專櫃)", "3COINS", "AEON Mall", "阿卡將本舖 (Akachan Honpo)", "PARCO 百貨", "HANDS (東急手創)"],
+            "PIE VAT": ["Mont-bell (全日本130+門市)", "BEAMS (直營/Outlet)", "三井 Outlet Park 全系列", "LaLaport", "東急 Plaza"],
+            "Global Blue": ["UNIQLO", "GU", "The North Face (專賣店/Outlet)", "高島屋", "三越伊勢丹", "大丸松坂屋", "阪急百貨", "國際精品專櫃"]
+        };
+
+        // ================= APP INITIALIZATION & FIREBASE SYNC =================
+        window.onload = function() {
+            try {
+                applySavedBackground();
+                initFirebaseListeners();
+                renderItinerary(1);
+                renderTodos('all');
+                renderTaxInformation();
+            } catch (err) {
+                console.warn("初始化警告:", err);
+            }
+        };
+
+        // Firebase Listeners with Permanent Default Expense Protection
+        function initFirebaseListeners() {
+            // Expenses sync
+            db.ref('hokkaido_data/expenses').on('value', (snapshot) => {
+                const cloudData = snapshot.val();
+                if (cloudData && Array.isArray(cloudData) && cloudData.length > 0) {
+                    expenses = cloudData;
+                } else {
+                    // Force ensure default expenses if cloud is empty
+                    expenses = defaultExpenses;
+                    db.ref('hokkaido_data/expenses').set(expenses);
+                }
+                localStorage.setItem('hkd_expenses', JSON.stringify(expenses));
+                renderExpenses();
+            });
+
+            // Journals sync
+            db.ref('hokkaido_data/journals').on('value', (snapshot) => {
+                const cloudData = snapshot.val();
+                journals = (cloudData && Array.isArray(cloudData)) ? cloudData : [];
+                localStorage.setItem('hkd_journals', JSON.stringify(journals));
+                renderJournals();
+            });
+
+            // Todos sync
+            db.ref('hokkaido_data/todos').on('value', (snapshot) => {
+                const cloudData = snapshot.val();
+                if (cloudData && Array.isArray(cloudData)) {
+                    todos = cloudData;
+                }
+                localStorage.setItem('hkd_todos', JSON.stringify(todos));
+                renderTodos('all');
+            });
+
+            // Vouchers sync
+            db.ref('hokkaido_data/vouchers').on('value', (snapshot) => {
+                const cloudData = snapshot.val();
+                vouchers = (cloudData && Array.isArray(cloudData)) ? cloudData : [];
+                localStorage.setItem('hkd_vouchers', JSON.stringify(vouchers));
+                if(isUnlocked) renderVouchers();
+            });
+        }
+
+        // Background Image Management
         function applySavedBackground() {
             const resetBtn = document.getElementById('reset-bg-btn');
             if(savedBgImage) {
@@ -774,6 +804,7 @@
             applySavedBackground();
         }
 
+        // Navigation Controller
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
@@ -789,6 +820,7 @@
             }
         }
 
+        // Day Selector for Itinerary
         function switchDay(dayNum) {
             currentDay = dayNum;
             for(let i=1; i<=5; i++) {
@@ -846,12 +878,11 @@
         function refreshWeatherSimulation() {
             const temps = ["6°C ~ 12°C (陽光普照)", "8°C ~ 14°C (晴時多雲)", "5°C ~ 10°C (微風有雨)"];
             const ropeways = ["🟢 正常營運中", "🟢 正常營運中 (班次密集)", "🟡 強風預警 (建議搭乘前再確認)"];
-            
             document.getElementById('sim-temp').innerText = temps[Math.floor(Math.random() * temps.length)];
             document.getElementById('sim-ropeway').innerText = ropeways[Math.floor(Math.random() * ropeways.length)];
         }
 
-        // Bookings PIN Unlock
+        // ================= BOOKINGS & PIN UNLOCK =================
         function unlockVouchers() {
             const pin = document.getElementById('pin-input').value;
             if(pin === '2026') {
@@ -869,22 +900,18 @@
         function uploadVoucher() {
             const fileInput = document.getElementById('voucher-file');
             const titleInput = document.getElementById('voucher-title');
-            
-            const titleVal = titleInput.value.trim() || `憑證 ${new Date().toLocaleDateString()}`;
+            if(!fileInput.files[0] || !titleInput.value) {
+                alert("請選擇照片並填寫憑證名稱");
+                return;
+            }
 
-            const processSave = (imgBase64 = null) => {
-                vouchers.push({ title: titleVal, image: imgBase64, date: new Date().toLocaleDateString() });
-                saveData('vouchers', vouchers);
-                renderVouchers();
+            compressAndBase64(fileInput.files[0], 800, 0.6, (base64) => {
+                vouchers.push({ title: titleInput.value, image: base64, date: new Date().toLocaleDateString() });
+                db.ref('hokkaido_data/vouchers').set(vouchers);
                 titleInput.value = '';
                 fileInput.value = '';
-            };
-
-            if(fileInput.files[0]) {
-                compressAndBase64(fileInput.files[0], 800, 0.6, (base64) => processSave(base64));
-            } else {
-                processSave();
-            }
+                renderVouchers();
+            });
         }
 
         function renderVouchers() {
@@ -913,11 +940,11 @@
 
         function deleteVoucher(index) {
             vouchers.splice(index, 1);
-            saveData('vouchers', vouchers);
+            db.ref('hokkaido_data/vouchers').set(vouchers);
             renderVouchers();
         }
 
-        // Wallet Logic
+        // ================= WALLET & EXPENSE LOGIC =================
         function switchWalletSubTab(sub) {
             if(sub === 'calc') {
                 document.getElementById('wallet-pane-calc').classList.remove('hidden');
@@ -964,12 +991,11 @@
                 valTwd = amountInput;
                 valJpy = Math.round(valTwd / rate);
             }
-
             document.getElementById('calc-result-jpy').innerText = `￥ ${valJpy.toLocaleString()} (約 NT$ ${valTwd.toLocaleString()})`;
         }
 
         function addExpenseItem() {
-            const titleInput = document.getElementById('expense-title').value.trim();
+            const title = document.getElementById('expense-title').value;
             const amount = parseFloat(document.getElementById('expense-amount').value);
             const curr = document.getElementById('expense-currency').value;
             const category = document.getElementById('expense-category').value;
@@ -977,12 +1003,10 @@
             const rate = parseFloat(document.getElementById('exchange-rate').value) || 0.215;
             const photoInput = document.getElementById('expense-photo');
 
-            if(isNaN(amount) || amount <= 0) {
-                alert("請輸入有效的金額！");
+            if(!title || isNaN(amount) || amount <= 0) {
+                alert("請填寫品項名稱與正確金額");
                 return;
             }
-
-            const title = titleInput !== "" ? titleInput : "未命名花費";
 
             let jpy = 0, twd = 0;
             if(curr === 'JPY') {
@@ -1007,13 +1031,13 @@
                     date: new Date().toLocaleDateString()
                 };
                 expenses.unshift(item);
-                saveData('expenses', expenses);
-                renderExpenses();
+                db.ref('hokkaido_data/expenses').set(expenses);
 
                 document.getElementById('expense-title').value = '';
                 document.getElementById('expense-amount').value = '';
                 document.getElementById('calc-expression').value = '';
                 document.getElementById('expense-photo').value = '';
+                renderExpenses();
             };
 
             if(photoInput.files[0]) {
@@ -1064,7 +1088,7 @@
 
         function deleteExpense(index) {
             expenses.splice(index, 1);
-            saveData('expenses', expenses);
+            db.ref('hokkaido_data/expenses').set(expenses);
             renderExpenses();
         }
 
@@ -1101,14 +1125,17 @@
             });
         }
 
-        // Journal Logic
+        // ================= JOURNAL LOGIC =================
         function addJournalPost() {
-            const titleInput = document.getElementById('journal-title').value.trim();
+            const title = document.getElementById('journal-title').value;
             const text = document.getElementById('journal-text').value;
             const author = document.getElementById('journal-author').value;
             const fileInput = document.getElementById('journal-image');
 
-            const title = titleInput !== "" ? titleInput : `冒險紀錄 - ${new Date().toLocaleDateString()}`;
+            if(!title || !text) {
+                alert("請填寫標題與心得！");
+                return;
+            }
 
             const savePost = (imgBase64 = null) => {
                 const post = {
@@ -1120,12 +1147,12 @@
                     time: new Date().toLocaleString('zh-TW', { hour12: false })
                 };
                 journals.unshift(post);
-                saveData('journals', journals);
-                renderJournals();
+                db.ref('hokkaido_data/journals').set(journals);
 
                 document.getElementById('journal-title').value = '';
                 document.getElementById('journal-text').value = '';
                 document.getElementById('journal-image').value = '';
+                renderJournals();
             };
 
             if(fileInput.files[0]) {
@@ -1165,11 +1192,11 @@
 
         function deleteJournal(index) {
             journals.splice(index, 1);
-            saveData('journals', journals);
+            db.ref('hokkaido_data/journals').set(journals);
             renderJournals();
         }
 
-        // Todos Logic
+        // ================= TODOS / LISTS LOGIC =================
         function addTodoItem() {
             const text = document.getElementById('new-todo-text').value;
             const assignee = document.getElementById('new-todo-assignee').value;
@@ -1177,24 +1204,24 @@
 
             const newTodo = { id: Date.now(), text, assignee, done: false };
             todos.push(newTodo);
-            saveData('todos', todos);
-            renderTodos('all');
+            db.ref('hokkaido_data/todos').set(todos);
 
             document.getElementById('new-todo-text').value = '';
+            renderTodos('all');
         }
 
         function toggleTodo(id) {
             const item = todos.find(t => t.id === id);
             if(item) {
                 item.done = !item.done;
-                saveData('todos', todos);
+                db.ref('hokkaido_data/todos').set(todos);
                 renderTodos('all');
             }
         }
 
         function deleteTodo(id) {
             todos = todos.filter(t => t.id !== id);
-            saveData('todos', todos);
+            db.ref('hokkaido_data/todos').set(todos);
             renderTodos('all');
         }
 
@@ -1219,11 +1246,10 @@
             });
         }
 
-        // Tax Logic
+        // ================= TAX INFORMATION LOGIC =================
         function renderTaxInformation() {
             const container = document.getElementById('tax-companies-container');
             container.innerHTML = '';
-
             const companies = ["J-TaxRefund", "Smart Detax", "PIE VAT", "Global Blue"];
 
             companies.forEach(comp => {
@@ -1251,29 +1277,26 @@
         }
 
         function toggleTaxAddModal() {
-            const modal = document.getElementById('tax-add-modal');
-            modal.classList.toggle('hidden');
+            document.getElementById('tax-add-modal').classList.toggle('hidden');
         }
 
         function saveCustomTaxStore() {
             const app = document.getElementById('modal-tax-app').value;
-            const name = document.getElementById('modal-store-name').value.trim();
-
+            const name = document.getElementById('modal-store-name').value;
             if(!name) {
                 alert("請輸入店家名稱");
                 return;
             }
-
             if(!taxCustomStores[app]) taxCustomStores[app] = [];
             taxCustomStores[app].push(name);
 
-            saveData('tax_stores', taxCustomStores);
-            renderTaxInformation();
+            localStorage.setItem('hkd_tax_stores', JSON.stringify(taxCustomStores));
             document.getElementById('modal-store-name').value = '';
             toggleTaxAddModal();
+            renderTaxInformation();
         }
 
-        // Image Compression Helper
+        // Utilities
         function compressAndBase64(file, maxWidth, quality, callback) {
             const reader = new FileReader();
             reader.readAsDataURL(file);
@@ -1284,19 +1307,15 @@
                     const canvas = document.createElement('canvas');
                     let width = img.width;
                     let height = img.height;
-
                     if (width > maxWidth) {
                         height = Math.round((height * maxWidth) / width);
                         width = maxWidth;
                     }
-
                     canvas.width = width;
                     canvas.height = height;
-
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, width, height);
-                    const base64 = canvas.toDataURL('image/jpeg', quality);
-                    callback(base64);
+                    callback(canvas.toDataURL('image/jpeg', quality));
                 };
             };
         }
